@@ -2,6 +2,8 @@ package by.teachmeskills.shop.controllers;
 
 import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.PagesPathEnum;
+import by.teachmeskills.shop.exceptions.IncorrectUserDataException;
+import by.teachmeskills.shop.exceptions.LoginException;
 import by.teachmeskills.shop.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
@@ -38,7 +40,7 @@ public class LoginController {
     }
 
     @PostMapping
-    public ModelAndView login(@ModelAttribute(USER) @Valid User user, BindingResult bindingResult, ModelAndView modelAndView) {
+    public ModelAndView login(@ModelAttribute(USER) @Valid User user, BindingResult bindingResult, ModelAndView modelAndView) throws LoginException, IncorrectUserDataException {
         if (bindingResult.hasErrors()) {
             populateError("email", modelAndView, bindingResult);
             populateError("password", modelAndView, bindingResult);

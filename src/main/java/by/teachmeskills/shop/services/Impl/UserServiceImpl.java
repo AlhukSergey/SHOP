@@ -11,6 +11,7 @@ import by.teachmeskills.shop.enums.PagesPathEnum;
 import by.teachmeskills.shop.enums.RequestParamsEnum;
 import by.teachmeskills.shop.enums.SetterActionsEnum;
 import by.teachmeskills.shop.exceptions.IncorrectUserDataException;
+import by.teachmeskills.shop.exceptions.LoginException;
 import by.teachmeskills.shop.exceptions.RequestCredentialsNullException;
 import by.teachmeskills.shop.exceptions.UserAlreadyExistsException;
 import by.teachmeskills.shop.repositories.UserRepository;
@@ -92,7 +93,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ModelAndView authenticate(User user) {
+    public ModelAndView authenticate(User user) throws LoginException, IncorrectUserDataException {
         ModelMap model = new ModelMap();
 
         if (user != null && user.getEmail() != null && user.getPassword() != null) {
@@ -113,17 +114,15 @@ public class UserServiceImpl implements UserService {
 
                 return new ModelAndView(PagesPathEnum.HOME_PAGE.getPath(), model);
             } else {
-                model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.USER_NOT_FOUND_INFO.getInfo());
-                return new ModelAndView(PagesPathEnum.LOGIN_PAGE.getPath(), model);
+                throw new LoginException(InfoEnum.USER_NOT_FOUND_INFO.getInfo());
             }
         }
 
-        model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.ERROR_DATA_INFO.getInfo());
-        return new ModelAndView(PagesPathEnum.LOGIN_PAGE.getPath(), model);
+        throw new IncorrectUserDataException(InfoEnum.INCORRECT_DATA_INFO.getInfo());
     }
 
     @Override
-    public ModelAndView createUser(User user) {
+    public ModelAndView createUser(User user) throws UserAlreadyExistsException {
         ModelAndView modelAndView = new ModelAndView();
         ModelMap model = new ModelMap();
 
@@ -158,12 +157,11 @@ public class UserServiceImpl implements UserService {
                     model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.USER_NOT_FOUND_INFO.getInfo());
                     modelAndView.setViewName(PagesPathEnum.LOGIN_PAGE.getPath());
                 }
-            } catch (IncorrectUserDataException | RequestCredentialsNullException e) {
-                model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.ERROR_DATA_INFO.getInfo() + e.getMessage());
+            } catch (IncorrectUserDataException e) {
+                model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.INCORRECT_DATA_INFO.getInfo() + e.getMessage());
                 modelAndView.setViewName(PagesPathEnum.REGISTRATION_PAGE.getPath());
             } catch (UserAlreadyExistsException e) {
-                model.addAttribute(RequestParamsEnum.INFO.getValue(), e.getMessage());
-                modelAndView.setViewName(PagesPathEnum.REGISTRATION_PAGE.getPath());
+                throw new UserAlreadyExistsException(InfoEnum.USER_ALREADY_EXISTS.getInfo());
             }
         }
         return modelAndView;

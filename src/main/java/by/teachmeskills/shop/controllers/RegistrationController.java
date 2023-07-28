@@ -2,6 +2,7 @@ package by.teachmeskills.shop.controllers;
 
 import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.PagesPathEnum;
+import by.teachmeskills.shop.exceptions.UserAlreadyExistsException;
 import by.teachmeskills.shop.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
@@ -38,7 +39,7 @@ public class RegistrationController {
     }
 
     @PostMapping
-    public ModelAndView registration(@ModelAttribute(USER) @Valid User user, BindingResult bindingResult, ModelAndView modelAndView) {
+    public ModelAndView registration(@ModelAttribute(USER) @Valid User user, BindingResult bindingResult, ModelAndView modelAndView) throws UserAlreadyExistsException {
         if (bindingResult.hasErrors()) {
             populateError("name", modelAndView, bindingResult);
             populateError("surname", modelAndView, bindingResult);

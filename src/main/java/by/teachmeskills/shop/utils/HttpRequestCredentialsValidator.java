@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 
 @UtilityClass
 public class HttpRequestCredentialsValidator {
-    public static void validateUserBirthday(User user) throws IncorrectUserDataException, RequestCredentialsNullException {
+    public static void validateUserBirthday(User user) throws IncorrectUserDataException {
         // check date format
         if (!DataValidator.validateDateFormat(String.valueOf(user.getBirthday()))) {
             throw new IncorrectUserDataException("Неверный формат даты!");

@@ -4,7 +4,6 @@ import lombok.Getter;
 
 @Getter
 public enum RequestParamsEnum {
-    COMMAND("command"),
     NAME("name"),
     SURNAME("surname"),
     BIRTHDAY("birthday"),
@@ -28,7 +27,8 @@ public enum RequestParamsEnum {
     ORDERS("orders"),
     ACTIVE_ORDERS("activeOrders"),
     FINISHED_ORDERS("finishedOrders"),
-    SEARCH_PARAM("search_param"),;
+    SEARCH_PARAM("search_param"),
+    ERROR_PARAM("error");
 
     private final String value;
 
