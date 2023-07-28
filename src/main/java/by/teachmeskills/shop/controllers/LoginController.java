@@ -3,6 +3,8 @@ package by.teachmeskills.shop.controllers;
 import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.PagesPathEnum;
 import by.teachmeskills.shop.services.UserService;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.Objects;
 
 import static by.teachmeskills.shop.enums.ShopConstants.USER;
 
@@ -34,12 +38,26 @@ public class LoginController {
     }
 
     @PostMapping
-    public ModelAndView login(@ModelAttribute(USER) User user) {
+    public ModelAndView login(@ModelAttribute(USER) @Valid User user, BindingResult bindingResult, ModelAndView modelAndView) {
+        if (bindingResult.hasErrors()) {
+            populateError("email", modelAndView, bindingResult);
+            populateError("password", modelAndView, bindingResult);
+            modelAndView.setViewName(PagesPathEnum.LOGIN_PAGE.getPath());
+            return modelAndView;
+        }
+
         return userService.authenticate(user);
     }
 
     @ModelAttribute(USER)
     public User setUpUserForm() {
         return new User();
+    }
+
+    private void populateError(String field, ModelAndView modelAndView, BindingResult bindingResult) {
+        if (bindingResult.hasFieldErrors(field)) {
+            modelAndView.addObject(field + "Error", Objects.requireNonNull(bindingResult.getFieldError(field))
+                    .getDefaultMessage());
+        }
     }
 }

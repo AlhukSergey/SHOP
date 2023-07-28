@@ -24,7 +24,11 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -114,7 +118,7 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.USER_NOT_FOUND_INFO.getInfo());
+        model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.ERROR_DATA_INFO.getInfo());
         return new ModelAndView(PagesPathEnum.LOGIN_PAGE.getPath(), model);
     }
 
@@ -131,7 +135,7 @@ public class UserServiceImpl implements UserService {
                 && user.getPassword() != null) {
 
             try {
-                HttpRequestCredentialsValidator.validateUserData(user);
+                HttpRequestCredentialsValidator.validateUserBirthday(user);
                 checkUserAlreadyExists(user.getEmail(), user.getPassword());
 
                 User createdUser = create(user);
@@ -172,7 +176,7 @@ public class UserServiceImpl implements UserService {
             if (allParams.containsKey(MapKeysEnum.NEW_PASSWORD.getKey())) {
                 HttpRequestCredentialsValidator.validatePasswords(allParams, user);
             } else {
-                HttpRequestCredentialsValidator.validateUserData(user);
+                HttpRequestCredentialsValidator.validateUserBirthday(user);
             }
         } catch (IncorrectUserDataException | RequestCredentialsNullException e) {
 

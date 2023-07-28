@@ -1,5 +1,8 @@
 package by.teachmeskills.shop.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum MapKeysEnum {
     ID("id"),
     NAME("name"),
@@ -18,7 +21,4 @@ public enum MapKeysEnum {
         this.key = key;
     }
 
-    public String getKey() {
-        return key;
-    }
 }

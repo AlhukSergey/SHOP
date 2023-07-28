@@ -1,9 +1,12 @@
 package by.teachmeskills.shop.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum InfoEnum {
     WELCOME_INFO( "Добро пожаловать, "),
     USER_NOT_FOUND_INFO("Логин либо пароль введены неверно. Пожалуйста, введите данные повторно либо перейдите на страницу регистрации."),
-    ERROR_DATA_INFO("Введены некорректные  данные. "),
+    ERROR_DATA_INFO("Введены некорректные  данные. Попробуйте снова..."),
     SHOP_CART_IS_EMPTY_INFO("В корзине еще нет продуктов. Чтобы оформить заказ, добавьте продукты."),
     DATA_SUCCESSFUL_CHANGED_INFO("Данные успешно изменены: "),
     PASSWORD_INCORRECT_INFO("Введен неверный пароль. Повторите попытку."),
@@ -12,9 +15,5 @@ public enum InfoEnum {
 
     InfoEnum(String info) {
         this.info = info;
-    }
-
-    public String getInfo() {
-        return info;
     }
 }

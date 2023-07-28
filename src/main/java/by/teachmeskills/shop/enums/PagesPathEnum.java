@@ -1,5 +1,8 @@
 package by.teachmeskills.shop.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum PagesPathEnum {
     REGISTRATION_PAGE("registration.html"),
     LOGIN_PAGE("login"),
@@ -17,7 +20,4 @@ public enum PagesPathEnum {
         this.path = path;
     }
 
-    public String getPath() {
-        return path;
-    }
 }

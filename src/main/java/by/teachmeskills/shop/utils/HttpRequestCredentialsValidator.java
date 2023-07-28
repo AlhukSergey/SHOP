@@ -12,27 +12,15 @@ import java.util.function.Predicate;
 
 @UtilityClass
 public class HttpRequestCredentialsValidator {
-    public static void validateUserData(User user) throws IncorrectUserDataException, RequestCredentialsNullException {
+    public static void validateUserBirthday(User user) throws IncorrectUserDataException, RequestCredentialsNullException {
         // check date format
         if (!DataValidator.validateDateFormat(String.valueOf(user.getBirthday()))) {
             throw new IncorrectUserDataException("Неверный формат даты!");
         }
 
         //checking that user is at least 16 years old, not older 73.
-        if (!DataValidator.validateDate(String.valueOf(user.getBirthday()))) {
+        if (!DataValidator.checkDateLimit(String.valueOf(user.getBirthday()))) {
             throw new IncorrectUserDataException("Введен неверный возраст. Возраст не может быть меньше 16 и больше 73 лет!");
-        }
-
-        //check email
-        if (!DataValidator.validateEmail(user.getEmail())) {
-            throw new IncorrectUserDataException("Неверный формат адреса электронной почты!");
-        }
-
-        //check password
-        if (!DataValidator.validatePassword(user.getPassword())) {
-            throw new IncorrectUserDataException("Неверный формат пароля! " +
-                    "Длина пароля должна быть не короче 8 символов. Пароль должен содержать как минимум одну цифру," +
-                    "одну заглавную букву, одну букву нижнего регистра, один специальный символ.");
         }
     }
 
