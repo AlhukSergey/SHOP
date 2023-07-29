@@ -4,16 +4,17 @@ import lombok.Getter;
 
 @Getter
 public enum PagesPathEnum {
-    REGISTRATION_PAGE("registration.html"),
-    LOGIN_PAGE("login.html"),
-    HOME_PAGE("home.html"),
-    CATEGORY_PAGE("category.html"),
-    PRODUCT_PAGE("product.html"),
-    SHOPPING_CART_PAGE("shoppingCart.html"),
-    MY_PAGE("myPage.html"),
-    USER_ACCOUNT_PAGE("user-account.html"),
-    SEARCH_PAGE("search.html"),
-    ERROR_PAGE("error.html");
+    REGISTRATION_PAGE("registration"),
+    LOGIN_PAGE("login"),
+    HOME_PAGE("home"),
+    CATEGORY_PAGE("category"),
+    PRODUCT_PAGE("product"),
+    SHOPPING_CART_PAGE("shoppingCart"),
+    MY_PAGE("myPage"),
+    USER_ACCOUNT_PAGE("user-account"),
+    SEARCH_PAGE("search"),
+    ERROR_PAGE("error"),
+    USER_STATISTIC_PAGE("user-monitoring");
 
     private final String path;
 

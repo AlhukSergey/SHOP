@@ -1,18 +1,16 @@
 package by.teachmeskills.shop.utils;
 
 import lombok.experimental.UtilityClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 @UtilityClass
 public class DataValidator {
-    private final static Logger log = LoggerFactory.getLogger(DataValidator.class);
-
     //check date format
     public static boolean validateDateFormat(String str) {
         boolean result = false;

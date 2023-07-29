@@ -1,22 +1,20 @@
 package by.teachmeskills.shop;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Aspect
 @Component
 public class LogAspect {
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
-
     @Pointcut(value = "execution(public * by.teachmeskills.shop..*(..))")
-    public void loggingOperation(){
+    public void loggingOperation() {
     }
 
     @Before(value = "loggingOperation()")

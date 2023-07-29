@@ -286,3 +286,11 @@ INSERT INTO shop.images (imagePath, categoryId, productId, primaryImage)
 VALUES ('https://cdnby.sportmaster.com/upload/mdm/media_content/resize/d90/395_380_5c02/54484920299.jpg', null, 12, 0);
 INSERT INTO shop.images (imagePath, categoryId, productId, primaryImage)
 VALUES ('https://cdnby.sportmaster.com/upload/mdm/media_content/resize/7ab/395_380_d636/54484930299.jpg', null, 12, 0);
+
+DROP TABLE IF EXISTS shop.statistic;
+CREATE TABLE IF NOT EXISTS shop.statistic
+(
+    id          INT          NOT NULL AUTO_INCREMENT,
+    description VARCHAR(300) NOT NULL,
+    PRIMARY KEY (id)
+);
