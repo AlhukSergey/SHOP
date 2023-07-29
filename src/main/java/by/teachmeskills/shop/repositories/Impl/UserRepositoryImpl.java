@@ -4,20 +4,20 @@ import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.MapKeysEnum;
 import by.teachmeskills.shop.repositories.UserRepository;
 import by.teachmeskills.shop.utils.EncryptionUtils;
-import lombok.SneakyThrows;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCallback;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
+    private final JdbcTemplate jdbcTemplate;
     private static String updateQuery;
     private static final String ADD_USER_QUERY = "INSERT INTO users (name, surname, birthday, balance, email, password) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String GET_ALL_USERS_QUERY = "SELECT * FROM users";
@@ -32,131 +32,77 @@ public class UserRepositoryImpl implements UserRepository {
             MapKeysEnum.BALANCE.getKey(), "balance",
             MapKeysEnum.EMAIL.getKey(), "email",
             MapKeysEnum.PASSWORD.getKey(), "password");
-    @SneakyThrows(Exception.class)
+
+    public UserRepositoryImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
     @Override
     public User create(User entity) {
-        Connection connection = pool.getConnection();
-        PreparedStatement psInsert = connection.prepareStatement(ADD_USER_QUERY);
+        return jdbcTemplate.execute(ADD_USER_QUERY, (PreparedStatementCallback<User>) ps -> {
+            ps.setString(1, entity.getName());
+            ps.setString(2, entity.getSurname());
+            ps.setTimestamp(3, Timestamp.valueOf(entity.getBirthday().atStartOfDay()));
+            ps.setBigDecimal(4, BigDecimal.valueOf(entity.getBalance()));
+            ps.setString(5, entity.getEmail());
+            ps.setString(6, EncryptionUtils.encrypt(entity.getPassword()));
+            ps.execute();
 
-        psInsert.setString(1, entity.getName());
-        psInsert.setString(2, entity.getSurname());
-        psInsert.setTimestamp(3, Timestamp.valueOf(entity.getBirthday().atStartOfDay()));
-        psInsert.setBigDecimal(4, BigDecimal.valueOf(entity.getBalance()));
-        psInsert.setString(5, entity.getEmail());
-        psInsert.setString(6, EncryptionUtils.encrypt(entity.getPassword()));
-        psInsert.execute();
-
-        pool.closeConnection(connection);
-        psInsert.close();
-        return entity;
+            return entity;
+        });
     }
-    @SneakyThrows(Exception.class)
+
     @Override
     public List<User> read() {
-        List<User> users = new ArrayList<>();
-        Connection connection = pool.getConnection();
-        PreparedStatement psGet = connection.prepareStatement(GET_ALL_USERS_QUERY);
-
-        ResultSet resultSet = psGet.executeQuery();
-        while (resultSet.next()) {
-            users.add(User.builder()
-                    .id(resultSet.getInt(1))
-                    .name(resultSet.getString(2))
-                    .surname(resultSet.getString(3))
-                    .birthday(resultSet.getTimestamp(4).toLocalDateTime().toLocalDate())
-                    .balance(resultSet.getBigDecimal(5).doubleValue())
-                    .email(resultSet.getString(5))
-                    .password(EncryptionUtils.decrypt(resultSet.getString(6)))
-                    .build()
-            );
-        }
-
-        resultSet.close();
-        pool.closeConnection(connection);
-        psGet.close();
-        return users;
+        return jdbcTemplate.query(GET_ALL_USERS_QUERY, (rs, rowNum) -> User.builder()
+                .id(rs.getInt("id"))
+                .name(rs.getString("name"))
+                .surname(rs.getString("surname"))
+                .birthday(rs.getTimestamp("birthday").toLocalDateTime().toLocalDate())
+                .balance(rs.getBigDecimal("balance").doubleValue())
+                .email(rs.getString("email"))
+                .password(EncryptionUtils.decrypt(rs.getString("password")))
+                .build());
     }
-    @SneakyThrows(Exception.class)
+
     @Override
     public User update(User entity) {
-        try {
-            Connection connection = pool.getConnection();
-            PreparedStatement psUpdate = connection.prepareStatement(updateQuery);
-
-            psUpdate.execute();
-
-            pool.closeConnection(connection);
-            psUpdate.close();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        jdbcTemplate.update(updateQuery);
         return entity;
     }
-    @SneakyThrows(Exception.class)
+
     @Override
     public void delete(int id) {
-        Connection connection = pool.getConnection();
-        PreparedStatement psDelete = connection.prepareStatement(DELETE_USER_QUERY);
-
-        psDelete.setInt(1, id);
-        psDelete.execute();
-
-        pool.closeConnection(connection);
-        psDelete.close();
+        jdbcTemplate.update(DELETE_USER_QUERY, id);
     }
-    @SneakyThrows(Exception.class)
+
     @Override
     public User findById(int id) {
-        User user = null;
-        Connection connection = pool.getConnection();
-        PreparedStatement psGet = connection.prepareStatement(GET_USER_BY_ID_QUERY);
-
-        psGet.setInt(1, id);
-        ResultSet resultSet = psGet.executeQuery();
-        while (resultSet.next()) {
-            user = User.builder()
-                    .id(resultSet.getInt(1))
-                    .name(resultSet.getString(2))
-                    .surname(resultSet.getString(3))
-                    .birthday(resultSet.getTimestamp(4).toLocalDateTime().toLocalDate())
-                    .balance(resultSet.getBigDecimal(5).doubleValue())
-                    .email(resultSet.getString(5))
-                    .password(EncryptionUtils.decrypt(resultSet.getString(6)))
-                    .build();
-        }
-        resultSet.close();
-
-        pool.closeConnection(connection);
-        psGet.close();
-        return user;
+        return jdbcTemplate.queryForObject(GET_USER_BY_ID_QUERY, (RowMapper<User>) (rs, rowNum) -> User.builder()
+                .id(rs.getInt("id"))
+                .name(rs.getString("name"))
+                .surname(rs.getString("surname"))
+                .birthday(rs.getTimestamp("birthday").toLocalDateTime().toLocalDate())
+                .balance(rs.getBigDecimal("balance").doubleValue())
+                .email(rs.getString("email"))
+                .password(EncryptionUtils.decrypt(rs.getString("password")))
+                .build(), id);
     }
-    @SneakyThrows(Exception.class)
+
     @Override
     public User findByEmailAndPassword(String email, String password) {
-        User user = null;
-        Connection connection = pool.getConnection();
-        PreparedStatement psGet = connection.prepareStatement(GET_USER_BY_EMAIL_AND_PASS_QUERY);
-
-        psGet.setString(1, email);
-        psGet.setString(2, EncryptionUtils.encrypt(password));
-        ResultSet resultSet = psGet.executeQuery();
-
-        while (resultSet.next()) {
-            user = User.builder()
-                    .id(resultSet.getInt(1))
-                    .name(resultSet.getString(2))
-                    .surname(resultSet.getString(3))
-                    .birthday(resultSet.getTimestamp(4).toLocalDateTime().toLocalDate())
-                    .balance(resultSet.getBigDecimal(5).doubleValue())
-                    .email(resultSet.getString(6))
-                    .password(EncryptionUtils.decrypt(resultSet.getString(7)))
-                    .build();
+        try { return jdbcTemplate.queryForObject(GET_USER_BY_EMAIL_AND_PASS_QUERY, (RowMapper<User>) (rs, rowNum) -> User.builder()
+                .id(rs.getInt("id"))
+                .name(rs.getString("name"))
+                .surname(rs.getString("surname"))
+                .email(rs.getString("email"))
+                .password(rs.getString("password"))
+                .birthday(rs.getTimestamp("birthday").toLocalDateTime().toLocalDate())
+                .balance(rs.getInt("balance"))
+                .build(), email, EncryptionUtils.encrypt(password));}
+        catch (EmptyResultDataAccessException e) {
+            return null;
         }
-        resultSet.close();
-
-        pool.closeConnection(connection);
-        psGet.close();
-        return user;
     }
 
     @Override
