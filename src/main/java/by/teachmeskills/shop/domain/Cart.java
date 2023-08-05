@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Cart {
-    private Map<Integer, Product> products;
+    private final Map<Integer, Product> products;
     private int totalPrice = 0;
 
     public Cart() {

@@ -69,48 +69,47 @@
             </div>
 
             <div class="userData" id="content-1">
-                <form action="/account" autocomplete="off" method="post" class="needs-validation">
-                    <input type="hidden" name="command" value="update-user-data"/>
+                <form action="/account" autocomplete="off" method="post">
                     <div class="form-group">
                         <label for="name">Имя:</label>
-                        <input type="text" class="form-control w-25" id="name" th:value="${name}" name="name" required>
+                        <input type="text" class="form-control w-25" id="name" th:value="${name}" name="name">
+                        <span class="error" th:text="${nameError}">Ошибка</span>
                     </div>
                     <div class="form-group">
                         <label for="surname">Фамилия:</label>
-                        <input type="text" class="form-control w-25" id="surname" th:value="${surname}" name="surname"
-                               required>
+                        <input type="text" class="form-control w-25" id="surname" th:value="${surname}" name="surname">
+                        <span class="error" th:text="${surnameError}">Ошибка</span>
                     </div>
                     <div class="form-group">
                         <label for="birthday">Дата рождения:</label>
-                        <input type="date" class="form-control w-25" id="birthday" th:value="${birthday}"
-                               name="birthday">
+                        <input type="date" class="form-control w-25" id="birthday" th:value="${birthday}" name="birthday">
+                        <span class="error" th:text="${birthdayError}">Ошибка</span>
                     </div>
                     <div class="form-group">
                         <label for="email">Почта:</label>
-                        <input type="text" class="form-control w-25" id="email" th:value="${email}" name="email"
-                               required>
+                        <input type="text" class="form-control w-25" id="email" th:value="${email}" name="email">
+                        <span class="error" th:text="${emailError}">Ошибка</span>
                     </div>
                     <button id="formDataBtn" type="submit" class="btn btn-primary">Сохранить</button>
                 </form>
             </div>
 
             <div class="changePass" id="content-2">
-                <form method="post" autocomplete="off" th:action="@{/account}" class="needs-validation">
-                    <input type="hidden" name="command" value="update-user-data"/>
+                <form method="post" autocomplete="off" action="/account/updatePassword">
                     <div class="form-group">
                         <label for="old_password">Старый пароль:</label>
-                        <input type="text" class="form-control w-25" id="old_password"
-                               placeholder="Введите старый пароль" name="old_password" required>
+                        <input type="text" class="form-control w-25" id="old_password" placeholder="Введите старый пароль" name="oldPassword">
+                        <span class="error" th:text="${oldPasswordError}">Ошибка</span>
                     </div>
                     <div class="form-group">
                         <label for="new_password">Новый пароль:</label>
-                        <input type="text" class="form-control w-25" id="new_password"
-                               placeholder="Введите новый пароль" name="new_password" required>
+                        <input type="text" class="form-control w-25" id="new_password" placeholder="Введите новый пароль" name="newPassword">
+                        <span class="error" th:text="${newPasswordError}">Ошибка</span>
                     </div>
                     <div class="form-group">
                         <label for="new_password_rep">Введите новый пароль повторно:</label>
-                        <input type="text" class="form-control w-25" id="new_password_rep"
-                               placeholder="Введите новый пароль повторно" name="new_password_rep" required>
+                        <input type="text" class="form-control w-25" id="new_password_rep" placeholder="Введите новый пароль повторно" name="newPasswordRep">
+                        <span class="error" th:text="${newPasswordRepError}">Ошибка</span>
                     </div>
                     <button id="formPassBtn" type="submit" class="btn btn-primary">Сохранить</button>
                 </form>
@@ -154,6 +153,5 @@
         </div>
     </div>
 </div>
-<script src="/script/validation-script.js"></script>
 </body>
 </html>

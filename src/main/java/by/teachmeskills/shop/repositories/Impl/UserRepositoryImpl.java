@@ -2,6 +2,7 @@ package by.teachmeskills.shop.repositories.Impl;
 
 import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.MapKeysEnum;
+import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.repositories.UserRepository;
 import by.teachmeskills.shop.utils.EncryptionUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -90,18 +91,18 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User findByEmailAndPassword(String email, String password) {
+    public User findByEmailAndPassword(String email, String password) throws EntityNotFoundException {
         try { return jdbcTemplate.queryForObject(GET_USER_BY_EMAIL_AND_PASS_QUERY, (RowMapper<User>) (rs, rowNum) -> User.builder()
                 .id(rs.getInt("id"))
                 .name(rs.getString("name"))
                 .surname(rs.getString("surname"))
                 .email(rs.getString("email"))
-                .password(rs.getString("password"))
+                .password(EncryptionUtils.decrypt(rs.getString("password")))
                 .birthday(rs.getTimestamp("birthday").toLocalDateTime().toLocalDate())
                 .balance(rs.getInt("balance"))
                 .build(), email, EncryptionUtils.encrypt(password));}
         catch (EmptyResultDataAccessException e) {
-            return null;
+            throw new EntityNotFoundException("Пользователь не найден.");
         }
     }
 

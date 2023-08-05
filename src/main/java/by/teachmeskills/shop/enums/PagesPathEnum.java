@@ -13,6 +13,7 @@ public enum PagesPathEnum {
     MY_PAGE("myPage"),
     USER_ACCOUNT_PAGE("user-account"),
     SEARCH_PAGE("search"),
+    REGISTRATION_OR_LOGIN_ERROR_PAGE("registrationOrLoginError"),
     ERROR_PAGE("error"),
     USER_STATISTIC_PAGE("user-monitoring");
 

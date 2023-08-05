@@ -2,10 +2,12 @@ package by.teachmeskills.shop.controllers;
 
 import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.PagesPathEnum;
-import by.teachmeskills.shop.exceptions.UserAlreadyExistsException;
+import by.teachmeskills.shop.exceptions.EntityNotFoundException;
+import by.teachmeskills.shop.exceptions.RegistrationException;
 import by.teachmeskills.shop.services.UserService;
-import jakarta.validation.Valid;
+import by.teachmeskills.shop.utils.beanvalidationgroup.Registration;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,16 +35,12 @@ public class RegistrationController {
         return new ModelAndView(PagesPathEnum.REGISTRATION_PAGE.getPath());
     }
 
-    @GetMapping("/login")
-    public ModelAndView openLoginPage() {
-        return new ModelAndView(PagesPathEnum.LOGIN_PAGE.getPath());
-    }
-
     @PostMapping
-    public ModelAndView registration(@ModelAttribute(USER) @Valid User user, BindingResult bindingResult, ModelAndView modelAndView) throws UserAlreadyExistsException {
+    public ModelAndView registration(@ModelAttribute(USER) @Validated(Registration.class) User user, BindingResult bindingResult, ModelAndView modelAndView) throws RegistrationException, EntityNotFoundException {
         if (bindingResult.hasErrors()) {
             populateError("name", modelAndView, bindingResult);
             populateError("surname", modelAndView, bindingResult);
+            populateError("birthday", modelAndView, bindingResult);
             populateError("email", modelAndView, bindingResult);
             populateError("password", modelAndView, bindingResult);
             modelAndView.setViewName(PagesPathEnum.REGISTRATION_PAGE.getPath());

@@ -2,11 +2,13 @@ package by.teachmeskills.shop.controllers;
 
 import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.PagesPathEnum;
+import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.exceptions.IncorrectUserDataException;
 import by.teachmeskills.shop.exceptions.LoginException;
 import by.teachmeskills.shop.services.UserService;
-import jakarta.validation.Valid;
+import by.teachmeskills.shop.utils.beanvalidationgroup.Login;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,13 +36,8 @@ public class LoginController {
         return new ModelAndView(PagesPathEnum.LOGIN_PAGE.getPath());
     }
 
-    @GetMapping("/registration")
-    public ModelAndView openRegistrationPage() {
-        return new ModelAndView(PagesPathEnum.REGISTRATION_PAGE.getPath());
-    }
-
     @PostMapping
-    public ModelAndView login(@ModelAttribute(USER) @Valid User user, BindingResult bindingResult, ModelAndView modelAndView) throws LoginException, IncorrectUserDataException {
+    public ModelAndView login(@ModelAttribute(USER) @Validated(Login.class) User user, BindingResult bindingResult, ModelAndView modelAndView) throws LoginException, IncorrectUserDataException, EntityNotFoundException {
         if (bindingResult.hasErrors()) {
             populateError("email", modelAndView, bindingResult);
             populateError("password", modelAndView, bindingResult);
