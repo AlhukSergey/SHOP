@@ -168,7 +168,8 @@ public class UserServiceImpl implements UserService {
         throw new IncorrectUserDataException("Введены некорректные данные: неверный действующий пароль, либо новый пароль и повтор нового пароля не совпадают.");
     }
 
-    private ModelAndView generateAccountPage(User user) {
+    @Override
+    public ModelAndView generateAccountPage(User user) {
         ModelMap model = new ModelMap();
 
         model.addAttribute(RequestParamsEnum.NAME.getValue(), user.getName());
@@ -180,7 +181,6 @@ public class UserServiceImpl implements UserService {
         model.addAttribute(RequestParamsEnum.ACTIVE_ORDERS.getValue(), orders.stream().filter(order -> order.getOrderStatus() == OrderStatus.ACTIVE).collect(Collectors.toList()));
         model.addAttribute(RequestParamsEnum.FINISHED_ORDERS.getValue(), orders.stream().filter(order -> order.getOrderStatus() == OrderStatus.FINISHED).collect(Collectors.toList()));
 
-        model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.DATA_SUCCESSFUL_CHANGED_INFO.getInfo());
         return new ModelAndView(PagesPathEnum.USER_ACCOUNT_PAGE.getPath(), model);
     }
 

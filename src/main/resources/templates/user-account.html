@@ -59,7 +59,6 @@
 <div class="container">
     <h2 style="text-align: center">Личный кабинет</h2>
     <div class="row">
-        <span class="error" th:text="${info}">Информация</span>
         <div class="tabs">
             <div class="col-md-auto tabs__links">
                 <a href="#content-1">Личные данные</a>
@@ -90,7 +89,8 @@
                         <input type="text" class="form-control w-25" id="email" th:value="${email}" name="email">
                         <span class="error" th:text="${emailError}">Ошибка</span>
                     </div>
-                    <button id="formDataBtn" type="submit" class="btn btn-primary">Сохранить</button>
+                    <button id="formDataBtn" type="submit" class="btn btn-primary"
+                            onclick="dateChanged()">Сохранить</button>
                 </form>
             </div>
 
@@ -111,7 +111,8 @@
                         <input type="text" class="form-control w-25" id="new_password_rep" placeholder="Введите новый пароль повторно" name="newPasswordRep">
                         <span class="error" th:text="${newPasswordRepError}">Ошибка</span>
                     </div>
-                    <button id="formPassBtn" type="submit" class="btn btn-primary">Сохранить</button>
+                    <button id="formPassBtn" type="submit" class="btn btn-primary"
+                            onclick="dateChanged()">Сохранить</button>
                 </form>
             </div>
 
@@ -153,5 +154,10 @@
         </div>
     </div>
 </div>
+<script>
+    function dateChanged() {
+        window.confirm("Данные успешно изменены!");
+    }
+</script>
 </body>
 </html>
