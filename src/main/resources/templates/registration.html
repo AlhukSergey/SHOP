@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/" lang="ru">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+    <title>Страница регистрации</title>
+</head>
+<body>
+<div class="container">
+    <div class="col-md-8 offset-md-4">
+        <h2>Регистрация</h2>
+        <p>Пожалуйста, введите свои данные:</p>
+        <form method="post" action="/registration">
+            <div class="form-group">
+                <label for="name">Имя:</label>
+                <input type="text" class="form-control w-25" id="name" placeholder="Введите имя" name="name">
+                <span class="error" th:text="${nameError}">Ошибка</span>
+            </div>
+            <div class="form-group">
+                <label for="surname">Фамилия:</label>
+                <input type="text" class="form-control w-25" id="surname" placeholder="Введите фамилию" name="surname">
+                <span class="error" th:text="${surnameError}">Ошибка</span>
+            </div>
+            <div class="form-group">
+                <label for="birthday">Дата рождения:</label>
+                <input type="date" class="form-control w-25" id="birthday" name="birthday">
+                <span class="error" th:text="${birthdayError}">Ошибка</span>
+            </div>
+            <div class="form-group">
+                <label for="email">Почта:</label>
+                <input type="text" class="form-control w-25" id="email" placeholder="Введите email" name="email">
+                <span class="error" th:text="${emailError}">Ошибка</span>
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="text" class="form-control w-25" id="password" placeholder="Введите пароль" name="password">
+                <span class="error" th:text="${passwordError}">Ошибка</span>
+            </div>
+            <button id="registrBtn" type="submit" class="btn btn-primary">Зарегистрироваться</button>
+        </form>
+        <a class="btn btn-primary" href="/login">На страницу входа</a>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>

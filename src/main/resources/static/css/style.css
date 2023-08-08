@@ -1,0 +1,40 @@
+a {
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    color: black;
+}
+
+.card-title {
+    min-height: 70px;
+}
+
+.card-img {
+    max-height: 355px;
+    margin-bottom: 20px;
+}
+
+
+.superNav {
+    font-size: 13px;
+}
+
+.card-body{
+    overflow: hidden;
+}
+
+.card-scale:hover {
+    transition: 1s;
+    transform: scale(1.1);
+}
+
+.form-control {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+@media screen and (max-width: 540px) {
+    .centerOnMobile {
+        text-align: center
+    }
+}
