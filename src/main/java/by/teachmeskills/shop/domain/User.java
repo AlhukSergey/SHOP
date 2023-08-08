@@ -1,8 +1,5 @@
 package by.teachmeskills.shop.domain;
 
-import by.teachmeskills.shop.utils.beanvalidationgroup.Login;
-import by.teachmeskills.shop.utils.beanvalidationgroup.Registration;
-import by.teachmeskills.shop.utils.beanvalidationgroup.UpdateDate;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
@@ -22,22 +19,28 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class User extends BaseEntity {
-    @NotBlank(message = "Поле должно быть заполнено!", groups = {Registration.class, UpdateDate.class})
-    @Size(min = 3, max = 100, message = "Имя не может содержать меньше 3 и больше 100 символов.", groups = {Registration.class, UpdateDate.class})
+    /* Marker interface for grouping validations to be applied at the time of creating a new user. */
+    public interface UserRegistration{}
+    /* Marker interface for grouping validations to be applied at the time of updating user data. */
+    public interface UserUpdate{}
+    /* Marker interface for grouping validations to be applied at the time of user login. */
+    public interface UserLogin{}
+
+    @NotBlank(message = "Поле должно быть заполнено!", groups = {UserRegistration.class, UserUpdate.class})
+    @Size(min = 3, max = 100, message = "Имя не может содержать меньше 3 и больше 100 символов.", groups = {UserRegistration.class, UserUpdate.class})
     private String name;
 
-    @NotBlank(message = "Поле должно быть заполнено!", groups = {Registration.class, UpdateDate.class})
-    @Size(min = 3, max = 100, message = "Фамилия не может содержать меньше 3 и больше 100 символов.", groups = {Registration.class, UpdateDate.class})
+    @NotBlank(message = "Поле должно быть заполнено!", groups = {UserRegistration.class, UserUpdate.class})
+    @Size(min = 3, max = 100, message = "Фамилия не может содержать меньше 3 и больше 100 символов.", groups = {UserRegistration.class, UserUpdate.class})
     private String surname;
 
-    @Past(groups = {Registration.class, UpdateDate.class})
+    @Past(groups = {UserRegistration.class, UserUpdate.class})
     private LocalDate birthday;
 
     private double balance;
 
-    //checkEmailFormat Email example (used for login) : anna18@gmail.com
-    @Email(regexp = "^(.+)@(\\S+)$", message = "Неверный формат email.", groups = {Registration.class, UpdateDate.class})
-    @NotBlank(message = "Поле должно быть заполнено!", groups = {Login.class, Registration.class, UpdateDate.class})
+    @Email(message = "Неверный формат email.", groups = {UserRegistration.class, UserUpdate.class})
+    @NotBlank(message = "Поле должно быть заполнено!", groups = {UserLogin.class, UserRegistration.class, UserUpdate.class})
     private String email;
     /*
        (?=.*[0-9]) a digit must occur at least once
@@ -50,7 +53,7 @@ public class User extends BaseEntity {
        */
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$", message = "Неверный формат пароля! " +
             "Длина пароля должна быть не короче 8 символов. Пароль должен содержать как минимум одну цифру," +
-            "одну заглавную букву, одну букву нижнего регистра, один специальный символ.", groups = Registration.class)
-    @NotBlank(message = "Поле должно быть заполнено!", groups = {Login.class, Registration.class})
+            "одну заглавную букву, одну букву нижнего регистра, один специальный символ.", groups = UserRegistration.class)
+    @NotBlank(message = "Поле должно быть заполнено!", groups = {UserLogin.class, UserRegistration.class})
     private String password;
 }

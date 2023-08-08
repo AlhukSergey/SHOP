@@ -6,7 +6,6 @@ import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.exceptions.IncorrectUserDataException;
 import by.teachmeskills.shop.exceptions.LoginException;
 import by.teachmeskills.shop.services.UserService;
-import by.teachmeskills.shop.utils.beanvalidationgroup.Login;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +36,7 @@ public class LoginController {
     }
 
     @PostMapping
-    public ModelAndView login(@ModelAttribute(USER) @Validated(Login.class) User user, BindingResult bindingResult, ModelAndView modelAndView) throws LoginException, IncorrectUserDataException, EntityNotFoundException {
+    public ModelAndView login(@ModelAttribute(USER) @Validated(User.UserLogin.class) User user, BindingResult bindingResult, ModelAndView modelAndView) throws LoginException, IncorrectUserDataException, EntityNotFoundException {
         if (bindingResult.hasErrors()) {
             populateError("email", modelAndView, bindingResult);
             populateError("password", modelAndView, bindingResult);

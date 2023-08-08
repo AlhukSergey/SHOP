@@ -16,7 +16,6 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static by.teachmeskills.shop.enums.RequestParamsEnum.CATEGORIES;
@@ -59,7 +58,7 @@ public class CategoryServiceImpl implements CategoryService {
         ModelMap model = new ModelMap();
 
         Category category = categoryRepository.findById(id);
-        if (Optional.ofNullable(category).isPresent()) {
+        if (category != null) {
 
             List<Product> products = productService.getProductsByCategoryId(category.getId());
             List<List<Image>> images = new ArrayList<>();

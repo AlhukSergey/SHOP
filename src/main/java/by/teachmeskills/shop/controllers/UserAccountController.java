@@ -5,7 +5,6 @@ import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.PagesPathEnum;
 import by.teachmeskills.shop.exceptions.IncorrectUserDataException;
 import by.teachmeskills.shop.services.UserService;
-import by.teachmeskills.shop.utils.beanvalidationgroup.UpdateDate;
 import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -38,7 +37,7 @@ public class UserAccountController {
 
 
     @PostMapping
-    public ModelAndView updateUserData(@ModelAttribute(USER) @Validated(UpdateDate.class) User user, BindingResult bindingResult, ModelAndView modelAndView) {
+    public ModelAndView updateUserData(@ModelAttribute(USER) @Validated(User.UserUpdate.class) User user, BindingResult bindingResult, ModelAndView modelAndView) {
         if (bindingResult.hasErrors()) {
             populateError("name", modelAndView, bindingResult);
             populateError("surname", modelAndView, bindingResult);

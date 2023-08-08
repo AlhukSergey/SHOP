@@ -15,7 +15,6 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static by.teachmeskills.shop.enums.RequestParamsEnum.IMAGES;
@@ -87,7 +86,7 @@ public class ProductServiceImpl implements ProductService {
     public ModelAndView getProductData(int id) {
         ModelMap model = new ModelMap();
         Product product = productRepository.findById(id);
-        if (Optional.ofNullable(product).isPresent()) {
+        if (product != null) {
             model.addAttribute(RequestParamsEnum.PRODUCT.getValue(), product);
             model.addAttribute(IMAGES.getValue(), imageService.getImagesByProductId(id));
         }
