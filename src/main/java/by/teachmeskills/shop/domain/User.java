@@ -1,5 +1,10 @@
 package by.teachmeskills.shop.domain;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
@@ -9,10 +14,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.util.List;
 
+@Entity
+@Table(name = "users")
 @Data
 @SuperBuilder
 @NoArgsConstructor
@@ -20,27 +29,37 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = true)
 public class User extends BaseEntity {
     /* Marker interface for grouping validations to be applied at the time of creating a new user. */
-    public interface UserRegistration{}
+    public interface UserRegistration {
+    }
+
     /* Marker interface for grouping validations to be applied at the time of updating user data. */
-    public interface UserUpdate{}
+    public interface UserUpdate {
+    }
+
     /* Marker interface for grouping validations to be applied at the time of user login. */
-    public interface UserLogin{}
+    public interface UserLogin {
+    }
 
     @NotBlank(message = "Поле должно быть заполнено!", groups = {UserRegistration.class, UserUpdate.class})
     @Size(min = 3, max = 100, message = "Имя не может содержать меньше 3 и больше 100 символов.", groups = {UserRegistration.class, UserUpdate.class})
+    @Column(name = "name")
     private String name;
 
     @NotBlank(message = "Поле должно быть заполнено!", groups = {UserRegistration.class, UserUpdate.class})
     @Size(min = 3, max = 100, message = "Фамилия не может содержать меньше 3 и больше 100 символов.", groups = {UserRegistration.class, UserUpdate.class})
+    @Column(name = "surname")
     private String surname;
 
     @Past(groups = {UserRegistration.class, UserUpdate.class})
+    @Column(name = "birthday")
     private LocalDate birthday;
 
+    @Column(name = "balance")
     private double balance;
 
     @Email(message = "Неверный формат email.", groups = {UserRegistration.class, UserUpdate.class})
     @NotBlank(message = "Поле должно быть заполнено!", groups = {UserLogin.class, UserRegistration.class, UserUpdate.class})
+    @Column(name = "email")
     private String email;
     /*
        (?=.*[0-9]) a digit must occur at least once
@@ -55,5 +74,11 @@ public class User extends BaseEntity {
             "Длина пароля должна быть не короче 8 символов. Пароль должен содержать как минимум одну цифру," +
             "одну заглавную букву, одну букву нижнего регистра, один специальный символ.", groups = UserRegistration.class)
     @NotBlank(message = "Поле должно быть заполнено!", groups = {UserLogin.class, UserRegistration.class})
+    @Column(name = "password")
     private String password;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<Order> orders;
 }

@@ -1,6 +1,7 @@
 package by.teachmeskills.shop.controllers;
 
 import by.teachmeskills.shop.enums.PagesPathEnum;
+import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.services.ProductService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +25,7 @@ public class SearchController {
     }
 
     @PostMapping("/findProducts")
-    public ModelAndView search(@RequestParam("search_param") String searchParameter) {
+    public ModelAndView search(@RequestParam("search_param") String searchParameter) throws EntityNotFoundException {
         return productService.getProductsBySearchParameter(searchParameter);
     }
 }

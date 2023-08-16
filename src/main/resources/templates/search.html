@@ -22,10 +22,10 @@
                 <ul class="navbar-nav ms-auto ">
                     <li class="nav-item">
                         <a class="nav-link mx-2 text-uppercase active" aria-current="page"
-                           href="/home">Главная</a>
+                           href="/home/1">Главная</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link mx-2 text-uppercase" href="/home">Каталог</a>
+                        <a class="nav-link mx-2 text-uppercase" href="/home/1">Каталог</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link mx-2 text-uppercase" href="/myPage">О нас</a>
@@ -73,7 +73,7 @@
                         <h5 class="card-title" th:text="${product.name}">Название продукта</h5>
                         <th:block th:each="image : ${images}">
                             <img class="card-img card-scale" th:src="${image.imagePath}" alt="Card image"
-                                 th:if="${product.id == image.productId and image.primary == 1}">
+                                 th:if="${product.id == image.product.id and image.primary == 1}">
                         </th:block>
                     </a>
                     <p class="card-text" th:text="${product.description}">Описание продукта</p>

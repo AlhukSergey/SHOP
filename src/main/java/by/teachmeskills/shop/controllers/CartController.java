@@ -3,6 +3,7 @@ package by.teachmeskills.shop.controllers;
 import by.teachmeskills.shop.domain.Cart;
 import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.ShopConstants;
+import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.services.CartService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -26,16 +27,16 @@ public class CartController {
     }
 
     @GetMapping("/add")
-    public ModelAndView addProductToCart(@RequestParam(ShopConstants.PRODUCT_ID_PARAM) String id, @ModelAttribute(SHOPPING_CART) Cart shopCart) {
+    public ModelAndView addProductToCart(@RequestParam(ShopConstants.PRODUCT_ID_PARAM) String id, @ModelAttribute(SHOPPING_CART) Cart shopCart) throws EntityNotFoundException {
         return cartService.addProductToCart(id, shopCart);
     }
     @GetMapping("/remove")
-    public ModelAndView removeProductFromCart(@RequestParam(ShopConstants.PRODUCT_ID_PARAM) String id, @ModelAttribute(SHOPPING_CART) Cart shopCart) {
+    public ModelAndView removeProductFromCart(@RequestParam(ShopConstants.PRODUCT_ID_PARAM) String id, @ModelAttribute(SHOPPING_CART) Cart shopCart) throws EntityNotFoundException {
         return cartService.removeProductFromCart(id, shopCart);
     }
 
     @GetMapping("/open")
-    public ModelAndView redirectToShoppingCart(@ModelAttribute(SHOPPING_CART) Cart shopCart) {
+    public ModelAndView redirectToShoppingCart(@ModelAttribute(SHOPPING_CART) Cart shopCart) throws EntityNotFoundException {
         return cartService.showCartProductList(shopCart);
     }
 

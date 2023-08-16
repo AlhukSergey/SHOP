@@ -1,5 +1,12 @@
 package by.teachmeskills.shop.domain;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -10,6 +17,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+@Entity
+@Table(name = "images")
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,11 +27,20 @@ import lombok.experimental.SuperBuilder;
 public class Image extends BaseEntity {
     @NotBlank(message = "Поле должно быть заполнено!")
     @Size(min = 10, message = "Путь к картинке не может содержать меньше 3 и больше 100 символов.")
+    @Column(name = "image_path")
     private String imagePath;
-    private int categoryId;
-    private int productId;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "product_Id", nullable = false)
+    private Product product;
+
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
+
     @NotBlank(message = "Поле должно быть заполнено!")
     @Min(value = 0, message = "Поле может принимать значение 0 (второстепенное изображение) либо 1 (главное изображение).")
     @Max(value = 1, message = "Поле может принимать значение 0 (второстепенное изображение) либо 1 (главное изображение).")
+    @Column(name = "primary_image")
     private int primary;
 }

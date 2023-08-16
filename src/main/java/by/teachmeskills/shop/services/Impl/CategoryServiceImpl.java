@@ -5,6 +5,8 @@ import by.teachmeskills.shop.domain.Image;
 import by.teachmeskills.shop.domain.Product;
 import by.teachmeskills.shop.enums.PagesPathEnum;
 import by.teachmeskills.shop.enums.RequestParamsEnum;
+import by.teachmeskills.shop.enums.ShopConstants;
+import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.repositories.CategoryRepository;
 import by.teachmeskills.shop.services.CategoryService;
 import by.teachmeskills.shop.services.ImageService;
@@ -54,7 +56,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public ModelAndView getCategoryById(int id) {
+    public ModelAndView getCategoryById(int id) throws EntityNotFoundException {
         ModelMap model = new ModelMap();
 
         Category category = categoryRepository.findById(id);
@@ -69,20 +71,53 @@ public class CategoryServiceImpl implements CategoryService {
 
             model.addAttribute(RequestParamsEnum.PRODUCTS.getValue(), products);
             model.addAttribute(IMAGES.getValue(), images.stream().flatMap(Collection::stream).collect(Collectors.toList()));
+        } else {
+            throw new EntityNotFoundException("Категории не найдены. Попробуйте позже.");
         }
 
         return new ModelAndView(PagesPathEnum.CATEGORY_PAGE.getPath(), model);
     }
 
     @Override
-    public ModelAndView getCategories() {
+    public ModelAndView getCategories() throws EntityNotFoundException {
         ModelMap model = new ModelMap();
         List<Category> categories = categoryRepository.read();
+        if (categories.isEmpty()) {
+            throw new EntityNotFoundException("Категории не найдены. Попробуйте позже.");
+        }
+
         List<Image> images = new ArrayList<>();
 
         for (Category category : categories) {
             images.add(imageService.getImageByCategoryId(category.getId()));
         }
+
+        model.addAttribute(CATEGORIES.getValue(), categories);
+        model.addAttribute(IMAGES.getValue(), images);
+
+        model.addAttribute(RequestParamsEnum.CATEGORIES.getValue(), categories);
+        return new ModelAndView(PagesPathEnum.HOME_PAGE.getPath(), model);
+    }
+
+    @Override
+    public ModelAndView getPaginatedCategories(int currentPage) throws EntityNotFoundException {
+        ModelMap model = new ModelMap();
+        List<Category> categories = categoryRepository.findPaginatedCategories(currentPage - 1, ShopConstants.PAGE_SIZE);
+        if (categories.isEmpty()) {
+            throw new EntityNotFoundException("Категории не найдены. Попробуйте позже.");
+        }
+
+        List<Image> images = new ArrayList<>();
+
+        for (Category category : categories) {
+            images.add(imageService.getImageByCategoryId(category.getId()));
+        }
+
+        Long totalItems = categoryRepository.getTotalItems();
+        int totalPages = (int) (Math.ceil(totalItems / ShopConstants.PAGE_SIZE));
+
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalPages", totalPages);
 
         model.addAttribute(CATEGORIES.getValue(), categories);
         model.addAttribute(IMAGES.getValue(), images);

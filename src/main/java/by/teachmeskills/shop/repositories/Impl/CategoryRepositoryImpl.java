@@ -2,63 +2,64 @@ package by.teachmeskills.shop.repositories.Impl;
 
 import by.teachmeskills.shop.domain.Category;
 import by.teachmeskills.shop.repositories.CategoryRepository;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCallback;
-import org.springframework.jdbc.core.RowMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Transactional
 @Repository
 public class CategoryRepositoryImpl implements CategoryRepository {
-    private final JdbcTemplate jdbcTemplate;
-    private static final String ADD_CATEGORY_QUERY = "INSERT INTO categories (name) VALUES (?)";
-    private static final String GET_ALL_CATEGORIES_QUERY = "SELECT * FROM categories";
-    private static final String UPDATE_CATEGORY_QUERY = "UPDATE categories SET name = ? WHERE id = ?";
-    private static final String DELETE_CATEGORY_QUERY = "DELETE FROM categories WHERE id = ?";
-    private static final String GET_CATEGORY_BY_ID_QUERY = "SELECT * FROM categories WHERE id = ?";
-
-    public CategoryRepositoryImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public Category create(Category entity) {
-        return jdbcTemplate.execute(ADD_CATEGORY_QUERY, (PreparedStatementCallback<Category>) ps -> {
-            ps.setString(1, entity.getName());
-            ps.execute();
-            return entity;
-        });
+        Session session = entityManager.unwrap(Session.class);
+        session.persist(entity);
+        return entity;
     }
 
     @Override
     public List<Category> read() {
-        return jdbcTemplate.query(GET_ALL_CATEGORIES_QUERY,  (rs, rowNum) -> Category.builder()
-                .id(rs.getInt("id"))
-                .name(rs.getString("name"))
-                .build());
+        Session session = entityManager.unwrap(Session.class);
+        Query<Category> query = session.createQuery("from Category", Category.class);
+        return query.list();
     }
 
     @Override
     public Category update(Category entity) {
-        return jdbcTemplate.execute(UPDATE_CATEGORY_QUERY, (PreparedStatementCallback<Category>) ps ->{
-            ps.setInt(1, entity.getId());
-            ps.setString(2, entity.getName());
-            ps.execute();
-            return entity;
-        });
+        Session session = entityManager.unwrap(Session.class);
+        return session.merge(entity);
     }
 
     @Override
     public void delete(int id) {
-       jdbcTemplate.update(DELETE_CATEGORY_QUERY, id);
+        Session session = entityManager.unwrap(Session.class);
+        Category category = session.get(Category.class, id);
+        session.remove(category);
     }
 
     @Override
     public Category findById(int id) {
-        return jdbcTemplate.queryForObject(GET_CATEGORY_BY_ID_QUERY, (RowMapper<Category>) (rs, rowNum) -> Category.builder()
-                .id(rs.getInt("id"))
-                .name(rs.getString("name"))
-                .build(), id);
+        Session session = entityManager.unwrap(Session.class);
+        return session.get(Category.class, id);
+    }
+
+    @Override
+    public List<Category> findPaginatedCategories(int first, int count) {
+        Session session = entityManager.unwrap(Session.class);
+        Query<Category> query = session.createQuery("from Category", Category.class);
+        return query.setFirstResult(first).setMaxResults(count).list();
+    }
+
+    @Override
+    public Long getTotalItems() {
+        Session session = entityManager.unwrap(Session.class);
+        return session.createQuery("select count(*) from Category", Long.class).getSingleResultOrNull();
     }
 }

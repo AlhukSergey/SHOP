@@ -1,6 +1,7 @@
 package by.teachmeskills.shop.services.Impl;
 
 import by.teachmeskills.shop.domain.Image;
+import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.repositories.ImageRepository;
 import by.teachmeskills.shop.services.ImageService;
 import org.springframework.stereotype.Service;
@@ -40,12 +41,20 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public Image getImageByCategoryId(int categoryId) {
-        return imageRepository.findByCategoryId(categoryId);
+    public Image getImageByCategoryId(int categoryId) throws EntityNotFoundException {
+        Image image = imageRepository.findByCategoryId(categoryId);
+        if(image == null) {
+            throw new EntityNotFoundException("Изображение не найдено.");
+        }
+        return image;
     }
 
     @Override
-    public List<Image> getImagesByProductId(int productId) {
-        return imageRepository.findByProductId(productId);
+    public List<Image> getImagesByProductId(int productId) throws EntityNotFoundException {
+        List<Image> images = imageRepository.findByProductId(productId);
+        if(images.isEmpty()) {
+            throw new EntityNotFoundException("Изображение не найдено.");
+        }
+        return images;
     }
 }

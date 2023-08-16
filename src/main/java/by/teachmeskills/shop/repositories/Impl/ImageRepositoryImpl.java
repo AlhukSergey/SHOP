@@ -2,94 +2,66 @@ package by.teachmeskills.shop.repositories.Impl;
 
 import by.teachmeskills.shop.domain.Image;
 import by.teachmeskills.shop.repositories.ImageRepository;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCallback;
-import org.springframework.jdbc.core.RowMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Transactional
 @Repository
 public class ImageRepositoryImpl implements ImageRepository {
-    private final JdbcTemplate jdbcTemplate;
-    private static final String ADD_IMAGE_QUERY = "INSERT INTO images (imagePath, categoryId, productId, primaryImage) VALUES (?, ?, ?, ?)";
-    private static final String GET_ALL_IMAGES_QUERY = "SELECT * FROM images";
-    private static final String UPDATE_IMAGE_QUERY = "UPDATE images SET imagePath = ? WHERE id = ?";
-    private static final String DELETE_IMAGE_QUERY = "DELETE FROM images WHERE id = ?";
-    private static final String GET_IMAGE_BY_ID_QUERY = "SELECT * FROM images WHERE id = ?";
-    private static final String GET_IMAGE_BY_CATEGORY_ID_QUERY = "SELECT * FROM images WHERE categoryId = ?";
-    private static final String GET_IMAGES_BY_PRODUCT_ID_QUERY = "SELECT * FROM images WHERE productId = ?";
-
-    public ImageRepositoryImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public Image create(Image entity) {
-        return jdbcTemplate.execute(ADD_IMAGE_QUERY, (PreparedStatementCallback<Image>) ps -> {
-            ps.setString(1, entity.getImagePath());
-            ps.setInt(2, entity.getCategoryId());
-            ps.setInt(3, entity.getProductId());
-            ps.setInt(4, entity.getPrimary());
-            ps.execute();
-            return entity;
-        });
+        Session session = entityManager.unwrap(Session.class);
+        session.persist(entity);
+        return entity;
     }
 
     @Override
     public List<Image> read() {
-        return jdbcTemplate.query(GET_ALL_IMAGES_QUERY, (rs, rowNum) -> Image.builder()
-                .id(rs.getInt("id"))
-                .imagePath(rs.getString("imagePath"))
-                .categoryId(rs.getInt("categoryId "))
-                .productId(rs.getInt("productId"))
-                .primary(rs.getInt("primaryImage"))
-                .build());
+        Session session = entityManager.unwrap(Session.class);
+        return session.createQuery("select i from Image i ", Image.class).list();
     }
 
     @Override
     public Image update(Image entity) {
-        return jdbcTemplate.execute(UPDATE_IMAGE_QUERY, (PreparedStatementCallback<Image>) ps -> {
-            ps.setString(1, entity.getImagePath());
-            ps.setInt(2, entity.getId());
-            ps.execute();
-            return entity;
-        });
+        Session session = entityManager.unwrap(Session.class);
+        return session.merge(entity);
     }
 
     @Override
     public void delete(int id) {
-        jdbcTemplate.update(DELETE_IMAGE_QUERY, id);
+        Session session = entityManager.unwrap(Session.class);
+        Image image = session.get(Image.class, id);
+        session.remove(image);
     }
 
     @Override
     public Image findById(int id) {
-        return jdbcTemplate.queryForObject(GET_IMAGE_BY_ID_QUERY, (RowMapper<Image>) (rs, rowNum) -> Image.builder()
-                .id(rs.getInt("id"))
-                .imagePath(rs.getString("imagePath"))
-                .categoryId(rs.getInt("categoryId"))
-                .productId(rs.getInt("productId"))
-                .primary(rs.getInt("primaryImage"))
-                .build(), id);
+        Session session = entityManager.unwrap(Session.class);
+        return session.get(Image.class, id);
     }
 
     @Override
     public Image findByCategoryId(int categoryId) {
-        return jdbcTemplate.queryForObject(GET_IMAGE_BY_CATEGORY_ID_QUERY, (RowMapper<Image>) (rs, rowNum) -> Image.builder()
-                .id(rs.getInt("id"))
-                .imagePath(rs.getString("imagePath"))
-                .categoryId(rs.getInt("categoryId"))
-                .build(), categoryId);
+        Session session = entityManager.unwrap(Session.class);
+        Query<Image> query = session.createQuery("select i from Image i where i.category.id=:category_id", Image.class);
+        query.setParameter("category_id", categoryId);
+        return query.uniqueResult();
     }
 
     @Override
     public List<Image> findByProductId(int productId) {
-        return jdbcTemplate.query(GET_IMAGES_BY_PRODUCT_ID_QUERY, (rs, rowNum) -> Image.builder()
-                .id(rs.getInt("id"))
-                .imagePath(rs.getString("imagePath"))
-                .categoryId(rs.getInt("categoryId"))
-                .productId(rs.getInt("productId"))
-                .primary(rs.getInt("primaryImage"))
-                .build(), productId);
+        Session session = entityManager.unwrap(Session.class);
+        Query<Image> query = session.createQuery("select i from Image i where i.product.id=:product_id", Image.class);
+        query.setParameter("product_id", productId);
+        return query.list();
     }
 }

@@ -9,14 +9,11 @@ import by.teachmeskills.shop.exceptions.RegistrationException;
 import jakarta.validation.Valid;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.Map;
-
 public interface UserService extends BaseService<User> {
     User getUserById(int id);
 
     User getUserByEmailAndPassword(String email, String password) throws EntityNotFoundException;
 
-    void generateForUpdate(Map<String, String> userData, int id);
     ModelAndView authenticate(User user) throws LoginException, IncorrectUserDataException, EntityNotFoundException;
 
     ModelAndView createUser(User user) throws RegistrationException, EntityNotFoundException;

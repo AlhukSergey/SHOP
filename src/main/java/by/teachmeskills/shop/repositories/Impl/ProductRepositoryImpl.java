@@ -2,111 +2,67 @@ package by.teachmeskills.shop.repositories.Impl;
 
 import by.teachmeskills.shop.domain.Product;
 import by.teachmeskills.shop.repositories.ProductRepository;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCallback;
-import org.springframework.jdbc.core.RowMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Transactional
 @Repository
 public class ProductRepositoryImpl implements ProductRepository {
-    private final JdbcTemplate jdbcTemplate;
-    private static final String GET_ALL_PRODUCTS_FOR_ORDER = "SELECT * FROM product p " +
-            "JOIN order_lists ol ON p.id = ol.productId " +
-            "JOIN orders o ON o.id = ol.orderId WHERE o.id = ?";
-
-    private static final String ADD_PRODUCT_QUERY = "INSERT INTO products (name, description, price, categoryId) VALUES (?, ?, ?, ?)";
-    private static final String GET_ALL_PRODUCTS_QUERY = "SELECT * FROM products";
-    private static final String DELETE_PRODUCT_QUERY = "DELETE FROM products WHERE id = ?";
-    private static final String GET_PRODUCT_BY_ID_QUERY = "SELECT * FROM products WHERE id = ?";
-    private static final String GET_PRODUCT_BY_CATEGORY_ID_QUERY = "SELECT * FROM products WHERE categoryId = ?";
-    private static final String GET_PRODUCT_QUANTITY = "SELECT quantity FROM order_lists ol JOIN orders o ON ol.orderId = o.id WHERE orderId = ?";
-    private static final String UPDATE_PRODUCT_PRICE_QUERY = "UPDATE products SET price = ? WHERE id = ?";
-
-    public ProductRepositoryImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public Product create(Product entity) {
-        return jdbcTemplate.execute(ADD_PRODUCT_QUERY, (PreparedStatementCallback<Product>) ps -> {
-            ps.setString(1, entity.getName());
-            ps.setString(2, entity.getDescription());
-            ps.setDouble(3, entity.getPrice());
-            ps.setInt(4, entity.getCategoryId());
-            ps.execute();
-
-            return entity;
-        });
+        Session session = entityManager.unwrap(Session.class);
+        session.persist(entity);
+        return entity;
     }
 
     @Override
     public List<Product> read() {
-        return jdbcTemplate.query(GET_ALL_PRODUCTS_QUERY, (rs, rowNum) -> Product.builder()
-                .id(rs.getInt("id"))
-                .name(rs.getString("name"))
-                .description(rs.getString("description"))
-                .price(rs.getDouble("price"))
-                .categoryId(rs.getInt("categoryId"))
-                .build());
+        Session session = entityManager.unwrap(Session.class);
+        return session.createQuery("select p from Product p ", Product.class).list();
     }
 
     @Override
     public Product update(Product entity) {
-        return jdbcTemplate.execute(UPDATE_PRODUCT_PRICE_QUERY, (PreparedStatementCallback<Product>) ps -> {
-            ps.setDouble(1, entity.getPrice());
-            ps.setInt(2, entity.getId());
-            ps.execute();
-            return entity;
-        });
+        Session session = entityManager.unwrap(Session.class);
+        return session.merge(entity);
     }
 
     @Override
     public void delete(int id) {
-        jdbcTemplate.update(DELETE_PRODUCT_QUERY, id);
+        Session session = entityManager.unwrap(Session.class);
+        Product product = session.get(Product.class, id);
+        session.remove(product);
     }
 
     @Override
     public Product findById(int id) {
-        return jdbcTemplate.queryForObject(GET_PRODUCT_BY_ID_QUERY, (RowMapper<Product>) (rs, rowNum) -> Product.builder()
-                .id(rs.getInt("id"))
-                .name(rs.getString("name"))
-                .description(rs.getString("description"))
-                .price(rs.getDouble("price"))
-                .categoryId(rs.getInt("categoryId"))
-                .build(), id);
+        Session session = entityManager.unwrap(Session.class);
+        return session.get(Product.class, id);
     }
 
     @Override
     public List<Product> findByCategoryId(int categoryId) {
-        return jdbcTemplate.query(GET_PRODUCT_BY_CATEGORY_ID_QUERY, (rs, rowNum) -> Product.builder()
-                .id(rs.getInt("id"))
-                .name(rs.getString("name"))
-                .description(rs.getString("description"))
-                .price(rs.getDouble("price"))
-                .categoryId(rs.getInt("categoryId"))
-                .build(), categoryId);
+        Session session = entityManager.unwrap(Session.class);
+        Query<Product> query = session.createQuery("select p from Product p where p.category.id=:category_id", Product.class);
+        query.setParameter("category_id", categoryId);
+        return query.list();
     }
 
     @Override
     public List<Product> findBySearchParameter(String parameter) {
-        return jdbcTemplate.query(generateSearchQuery(parameter), (rs, rowNum) -> Product.builder()
-                .id(rs.getInt("id"))
-                .name(rs.getString("name"))
-                .description(rs.getString("description"))
-                .price(rs.getDouble("price"))
-                .categoryId(rs.getInt("categoryId"))
-                .build());
-    }
-
-    private String generateSearchQuery(String searchParameter) {
-        StringBuilder query = new StringBuilder("SELECT * FROM products WHERE (LOWER (name) LIKE '%");
-
-        return query.append(searchParameter)
-                .append("%' OR LOWER (description) LIKE '%")
-                .append(searchParameter)
-                .append("%') ORDER BY name")
-                .toString();
+        Session session = entityManager.unwrap(Session.class);
+        Query<Product> query = session.createQuery("select p from Product p where lower(p.name) like lower(:parameter) " +
+                "or lower(p.description) like lower(:parameter) order by name", Product.class);
+        query.setParameter("parameter","%" + parameter.toLowerCase() + "%");
+        return query.list();
     }
 }

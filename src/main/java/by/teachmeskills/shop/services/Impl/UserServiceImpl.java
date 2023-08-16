@@ -7,27 +7,27 @@ import by.teachmeskills.shop.domain.OrderStatus;
 import by.teachmeskills.shop.domain.PasswordForm;
 import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.InfoEnum;
-import by.teachmeskills.shop.enums.MapKeysEnum;
 import by.teachmeskills.shop.enums.PagesPathEnum;
 import by.teachmeskills.shop.enums.RequestParamsEnum;
+import by.teachmeskills.shop.enums.ShopConstants;
 import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.exceptions.IncorrectUserDataException;
 import by.teachmeskills.shop.exceptions.LoginException;
 import by.teachmeskills.shop.exceptions.RegistrationException;
 import by.teachmeskills.shop.exceptions.UserAlreadyExistsException;
+import by.teachmeskills.shop.repositories.CategoryRepository;
 import by.teachmeskills.shop.repositories.UserRepository;
 import by.teachmeskills.shop.services.CategoryService;
 import by.teachmeskills.shop.services.ImageService;
 import by.teachmeskills.shop.services.OrderService;
 import by.teachmeskills.shop.services.UserService;
+import by.teachmeskills.shop.utils.EncryptionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static by.teachmeskills.shop.enums.RequestParamsEnum.CATEGORIES;
@@ -39,12 +39,14 @@ public class UserServiceImpl implements UserService {
     private final CategoryService categoryService;
     private final ImageService imageService;
     private final OrderService orderService;
+    private final CategoryRepository categoryRepository;
 
-    public UserServiceImpl(UserRepository userRepository, CategoryService categoryService, ImageService imageService, OrderService orderService) {
+    public UserServiceImpl(UserRepository userRepository, CategoryService categoryService, ImageService imageService, OrderService orderService, CategoryRepository categoryRepository) {
         this.userRepository = userRepository;
         this.categoryService = categoryService;
         this.imageService = imageService;
         this.orderService = orderService;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
@@ -78,25 +80,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void generateForUpdate(Map<String, String> userData, int id) {
-        userRepository.generateUpdateQuery(userData, id);
-    }
-
-    @Override
     public ModelAndView authenticate(User user) throws LoginException, IncorrectUserDataException, EntityNotFoundException {
         ModelMap model = new ModelMap();
 
         if (user != null && user.getEmail() != null && user.getPassword() != null) {
-            User loggedUser = userRepository.findByEmailAndPassword(user.getEmail(), user.getPassword());
+            User loggedUser = userRepository.findByEmailAndPassword(user.getEmail(), EncryptionUtils.encrypt(user.getPassword()));
 
             if (loggedUser != null) {
-                List<Category> categories = categoryService.read();
+                List<Category> categories = categoryRepository.findPaginatedCategories(0, ShopConstants.PAGE_SIZE);
                 List<Image> images = new ArrayList<>();
 
                 for (Category category : categories) {
                     images.add(imageService.getImageByCategoryId(category.getId()));
                 }
 
+                Long totalItems = categoryRepository.getTotalItems();
+                int totalPages = (int) (Math.ceil(totalItems / ShopConstants.PAGE_SIZE));
+
+                model.addAttribute("currentPage", 1);
+                model.addAttribute("totalPages", totalPages);
                 model.addAttribute(CATEGORIES.getValue(), categories);
                 model.addAttribute(IMAGES.getValue(), images);
                 model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.WELCOME_INFO.getInfo() + loggedUser.getName() + ".");
@@ -113,19 +115,28 @@ public class UserServiceImpl implements UserService {
     @Override
     public ModelAndView createUser(User user) throws RegistrationException, EntityNotFoundException {
         if (checkUserAlreadyExists(user.getEmail(), user.getPassword())) {
+            user.setPassword(EncryptionUtils.encrypt(user.getPassword()));
             User createdUser = create(user);
 
             if (createdUser != null) {
                 ModelMap model = new ModelMap();
 
-                List<Category> categories = categoryService.read();
                 List<Image> images = new ArrayList<>();
+                List<Category> categories = categoryRepository.findPaginatedCategories(0, ShopConstants.PAGE_SIZE);
 
                 for (Category category : categories) {
                     images.add(imageService.getImageByCategoryId(category.getId()));
                 }
+
+                Long totalItems = categoryRepository.getTotalItems();
+                int totalPages = (int) (Math.ceil(totalItems / ShopConstants.PAGE_SIZE));
+
+                model.addAttribute("currentPage", 1);
+                model.addAttribute("totalPages", totalPages);
                 model.addAttribute(CATEGORIES.getValue(), categories);
                 model.addAttribute(IMAGES.getValue(), images);
+
+                model.addAttribute(CATEGORIES.getValue(), categories);
                 model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.WELCOME_INFO.getInfo() + createdUser.getName() + ".");
 
                 model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.WELCOME_INFO.getInfo() + createdUser.getName() + ".");
@@ -139,15 +150,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ModelAndView updateData(User user) {
-        Map<String, String> allParams = new HashMap<>();
-        allParams.put(MapKeysEnum.NAME.getKey(), user.getName());
-        allParams.put(MapKeysEnum.SURNAME.getKey(), user.getSurname());
-        allParams.put(MapKeysEnum.BIRTHDAY.getKey(), user.getBirthday().toString());
-        allParams.put(MapKeysEnum.EMAIL.getKey(), user.getEmail());
-
-        generateForUpdate(allParams, user.getId());
         update(user);
-
         return generateAccountPage(user);
     }
 
@@ -156,9 +159,6 @@ public class UserServiceImpl implements UserService {
         if (passwords.getOldPassword().equals(user.getPassword())
                 && passwords.getNewPassword().equals(passwords.getNewPasswordRep()) &&
                 !passwords.getNewPassword().equals(user.getPassword())) {
-            Map<String, String> params = new HashMap<>();
-            params.put(MapKeysEnum.NEW_PASSWORD.getKey(), passwords.getNewPassword());
-            generateForUpdate(params, user.getId());
             user.setPassword(passwords.getNewPassword());
             update(user);
 
@@ -184,7 +184,12 @@ public class UserServiceImpl implements UserService {
         return new ModelAndView(PagesPathEnum.USER_ACCOUNT_PAGE.getPath(), model);
     }
 
-    private boolean checkUserAlreadyExists(String email, String password) throws EntityNotFoundException {
-        return getUserByEmailAndPassword(email, password) == null;
+    private boolean checkUserAlreadyExists(String email, String password){
+        try {
+            User existUser = getUserByEmailAndPassword(email, password);
+            return existUser == null;
+        } catch (EntityNotFoundException e) {
+            return true;
+        }
     }
 }

@@ -9,6 +9,7 @@ import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.InfoEnum;
 import by.teachmeskills.shop.enums.PagesPathEnum;
 import by.teachmeskills.shop.enums.RequestParamsEnum;
+import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.repositories.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
@@ -34,7 +35,7 @@ public class CartService {
         this.imageService = imageService;
     }
 
-    public ModelAndView addProductToCart(String id, Cart shopCart) {
+    public ModelAndView addProductToCart(String id, Cart shopCart) throws EntityNotFoundException {
         ModelMap model = new ModelMap();
 
         int productId = Integer.parseInt(id);
@@ -47,7 +48,7 @@ public class CartService {
         return new ModelAndView(PagesPathEnum.PRODUCT_PAGE.getPath(), model);
     }
 
-    public ModelAndView removeProductFromCart(String productId, Cart shopCart) {
+    public ModelAndView removeProductFromCart(String productId, Cart shopCart) throws EntityNotFoundException {
         ModelMap model = new ModelMap();
 
         shopCart.removeProduct(Integer.parseInt(productId));
@@ -65,7 +66,7 @@ public class CartService {
         return new ModelAndView(PagesPathEnum.SHOPPING_CART_PAGE.getPath(), model);
     }
 
-    public ModelAndView showCartProductList(Cart shopCart) {
+    public ModelAndView showCartProductList(Cart shopCart) throws EntityNotFoundException {
         ModelMap model = new ModelMap();
 
         List<Product> products = shopCart.getProducts();
@@ -92,10 +93,11 @@ public class CartService {
         }
 
         Order order = Order.builder()
-                .userId(user.getId())
                 .createdAt(LocalDateTime.now())
                 .orderStatus(OrderStatus.ACTIVE)
                 .price(shopCart.getTotalPrice())
+                .products(productList)
+                .user(user)
                 .build();
 
         orderService.create(order);

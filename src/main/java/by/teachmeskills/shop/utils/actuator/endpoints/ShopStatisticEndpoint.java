@@ -3,6 +3,7 @@ package by.teachmeskills.shop.utils.actuator.endpoints;
 import by.teachmeskills.shop.domain.Statistic;
 import by.teachmeskills.shop.enums.PagesPathEnum;
 import by.teachmeskills.shop.enums.RequestParamsEnum;
+import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.repositories.StatisticRepository;
 import by.teachmeskills.shop.services.ProductService;
 import by.teachmeskills.shop.services.UserService;
@@ -46,7 +47,7 @@ public class ShopStatisticEndpoint {
     }
 
     @WriteOperation
-    public void writeOperation(@Selector int categoryId) {
+    public void writeOperation(@Selector int categoryId) throws EntityNotFoundException {
         StopWatch stopWatch = new StopWatch("App");
         stopWatch.start("App Startup");
         productService.getProductsByCategoryId(categoryId);

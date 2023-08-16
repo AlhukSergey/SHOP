@@ -5,6 +5,7 @@ import by.teachmeskills.shop.domain.Product;
 import by.teachmeskills.shop.enums.InfoEnum;
 import by.teachmeskills.shop.enums.PagesPathEnum;
 import by.teachmeskills.shop.enums.RequestParamsEnum;
+import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.repositories.ProductRepository;
 import by.teachmeskills.shop.services.ImageService;
 import by.teachmeskills.shop.services.ProductService;
@@ -61,9 +62,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ModelAndView getProductsBySearchParameter(String parameter) {
+    public ModelAndView getProductsBySearchParameter(String parameter) throws EntityNotFoundException {
         ModelMap model = new ModelMap();
         List<Product> products = productRepository.findBySearchParameter(parameter);
+
 
         if (!products.isEmpty()) {
             List<List<Image>> images = new ArrayList<>();
@@ -83,7 +85,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ModelAndView getProductData(int id) {
+    public ModelAndView getProductData(int id) throws EntityNotFoundException {
         ModelMap model = new ModelMap();
         Product product = productRepository.findById(id);
         if (product != null) {

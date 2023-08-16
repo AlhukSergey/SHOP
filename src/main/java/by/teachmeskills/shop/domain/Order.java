@@ -1,29 +1,53 @@
 package by.teachmeskills.shop.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+@Entity
+@Table(name = "orders")
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class Order extends BaseEntity{
-    private int id;
-    private int userId;
+public class Order extends BaseEntity {
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private OrderStatus orderStatus;
+
     @PastOrPresent
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
-    private List<Product> productList;
-    @NotBlank(message = "Поле должно быть заполнено!")
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToMany
+    @JoinTable(name="orders_products", joinColumns = @JoinColumn(name = "order_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id"))
+    private List<Product> products;
+
     @Min(value = 0)
+    @Column(name = "price")
     private double price;
+
+    @ManyToOne(optional = false)
+    private User user;
 }

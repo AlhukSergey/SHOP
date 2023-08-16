@@ -1,5 +1,6 @@
 package by.teachmeskills.shop.controllers;
 
+import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.services.CategoryService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +18,7 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public ModelAndView openCategoryPage(@PathVariable int id) {
+    public ModelAndView openCategoryPage(@PathVariable int id) throws EntityNotFoundException {
         return categoryService.getCategoryById(id);
     }
 }
