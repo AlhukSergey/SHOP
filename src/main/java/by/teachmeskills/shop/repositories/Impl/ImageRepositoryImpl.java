@@ -5,8 +5,6 @@ import by.teachmeskills.shop.repositories.ImageRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,49 +17,40 @@ public class ImageRepositoryImpl implements ImageRepository {
 
     @Override
     public Image create(Image entity) {
-        Session session = entityManager.unwrap(Session.class);
-        session.persist(entity);
+        entityManager.persist(entity);
         return entity;
     }
 
     @Override
     public List<Image> read() {
-        Session session = entityManager.unwrap(Session.class);
-        return session.createQuery("select i from Image i ", Image.class).list();
+        return entityManager.createQuery("select i from Image i ", Image.class).getResultList();
     }
 
     @Override
     public Image update(Image entity) {
-        Session session = entityManager.unwrap(Session.class);
-        return session.merge(entity);
+        return entityManager.merge(entity);
     }
 
     @Override
     public void delete(int id) {
-        Session session = entityManager.unwrap(Session.class);
-        Image image = session.get(Image.class, id);
-        session.remove(image);
+        Image image = entityManager.find(Image.class, id);
+        entityManager.remove(image);
     }
 
     @Override
     public Image findById(int id) {
-        Session session = entityManager.unwrap(Session.class);
-        return session.get(Image.class, id);
+        return entityManager.find(Image.class, id);
     }
 
     @Override
     public Image findByCategoryId(int categoryId) {
-        Session session = entityManager.unwrap(Session.class);
-        Query<Image> query = session.createQuery("select i from Image i where i.category.id=:category_id", Image.class);
-        query.setParameter("category_id", categoryId);
-        return query.uniqueResult();
+        return entityManager.createQuery("select i from Image i where i.category.id=:category_id", Image.class)
+                .setParameter("category_id", categoryId).getSingleResult();
     }
 
     @Override
     public List<Image> findByProductId(int productId) {
-        Session session = entityManager.unwrap(Session.class);
-        Query<Image> query = session.createQuery("select i from Image i where i.product.id=:product_id", Image.class);
-        query.setParameter("product_id", productId);
-        return query.list();
+        return entityManager.createQuery("select i from Image i where i.product.id=:product_id", Image.class)
+                .setParameter("product_id", productId).getResultList();
     }
 }

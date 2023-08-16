@@ -5,8 +5,6 @@ import by.teachmeskills.shop.repositories.OrderRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
@@ -21,50 +19,40 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public Order create(Order entity) {
-        Session session = entityManager.unwrap(Session.class);
-        session.persist(entity);
+        entityManager.persist(entity);
         return entity;
     }
 
     @Override
     public List<Order> read() {
-        Session session = entityManager.unwrap(Session.class);
-        return session.createQuery("select o Order o ", Order.class).list();
+        return entityManager.createQuery("select o Order o ", Order.class).getResultList();
     }
 
     @Override
     public Order update(Order entity) {
-        Session session = entityManager.unwrap(Session.class);
-        return session.merge(entity);
+        return entityManager.merge(entity);
     }
 
     @Override
     public void delete(int id) {
-        Session session = entityManager.unwrap(Session.class);
-        Order order = session.get(Order.class, id);
-        session.remove(order);
+        Order order = entityManager.find(Order.class, id);
+        entityManager.remove(order);
     }
 
     @Override
     public Order findById(int id) {
-        Session session = entityManager.unwrap(Session.class);
-        return session.get(Order.class, id);
+        return entityManager.find(Order.class, id);
     }
 
     @Override
     public List<Order> findByDate(LocalDateTime date) {
-        Session session = entityManager.unwrap(Session.class);
-        Query<Order> query = session.createQuery("select o from Order o where o.created_at=:created_at", Order.class);
-        query.setParameter("created_at", Timestamp.valueOf(date));
-        return query.list();
-
+        return entityManager.createQuery("select o from Order o where o.created_at=:created_at", Order.class)
+                .setParameter("created_at", Timestamp.valueOf(date)).getResultList();
     }
 
     @Override
     public List<Order> findByUserId(int id) {
-        Session session = entityManager.unwrap(Session.class);
-        Query<Order> query = session.createQuery("select o from Order o where o.user.id=:user_id", Order.class);
-        query.setParameter("user_id", id);
-        return query.list();
+        return entityManager.createQuery("select o from Order o where o.user.id=:user_id", Order.class)
+                .setParameter("user_id", id).getResultList();
     }
 }

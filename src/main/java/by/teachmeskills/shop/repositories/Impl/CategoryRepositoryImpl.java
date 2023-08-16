@@ -5,8 +5,6 @@ import by.teachmeskills.shop.repositories.CategoryRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,47 +17,38 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
     @Override
     public Category create(Category entity) {
-        Session session = entityManager.unwrap(Session.class);
-        session.persist(entity);
+        entityManager.persist(entity);
         return entity;
     }
 
     @Override
     public List<Category> read() {
-        Session session = entityManager.unwrap(Session.class);
-        Query<Category> query = session.createQuery("from Category", Category.class);
-        return query.list();
+        return entityManager.createQuery("select c from Category c", Category.class).getResultList();
     }
 
     @Override
     public Category update(Category entity) {
-        Session session = entityManager.unwrap(Session.class);
-        return session.merge(entity);
+        return entityManager.merge(entity);
     }
 
     @Override
     public void delete(int id) {
-        Session session = entityManager.unwrap(Session.class);
-        Category category = session.get(Category.class, id);
-        session.remove(category);
+        Category category = entityManager.find(Category.class, id);
+        entityManager.remove(category);
     }
 
     @Override
     public Category findById(int id) {
-        Session session = entityManager.unwrap(Session.class);
-        return session.get(Category.class, id);
+        return entityManager.find(Category.class, id);
     }
 
     @Override
     public List<Category> findPaginatedCategories(int first, int count) {
-        Session session = entityManager.unwrap(Session.class);
-        Query<Category> query = session.createQuery("from Category", Category.class);
-        return query.setFirstResult(first).setMaxResults(count).list();
+        return entityManager.createQuery("from Category", Category.class).setFirstResult(first).setMaxResults(count).getResultList();
     }
 
     @Override
     public Long getTotalItems() {
-        Session session = entityManager.unwrap(Session.class);
-        return session.createQuery("select count(*) from Category", Long.class).getSingleResultOrNull();
+        return entityManager.createQuery("select count(*) from Category", Long.class).getSingleResult();
     }
 }
