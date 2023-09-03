@@ -9,8 +9,6 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,7 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Entity
@@ -33,18 +31,16 @@ public class Order extends BaseEntity {
     @Column(name = "status")
     private OrderStatus orderStatus;
 
-    @PastOrPresent
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private Timestamp createdAt;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToMany
-    @JoinTable(name="orders_products", joinColumns = @JoinColumn(name = "order_id"),
+    @JoinTable(name = "orders_products", joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id"))
     private List<Product> products;
 
-    @Min(value = 0)
     @Column(name = "price")
     private double price;
 

@@ -25,7 +25,7 @@ public class GlobalControllerExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler({RegistrationException.class})
+    @ExceptionHandler(RegistrationException.class)
     public ModelAndView handleRegistrationException(Exception ex) {
         ModelMap modelMap = new ModelMap();
         modelMap.addAttribute(RequestParamsEnum.ERROR_PARAM.getValue(), ex.getMessage());
@@ -33,7 +33,7 @@ public class GlobalControllerExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler({IncorrectUserDataException.class})
+    @ExceptionHandler(IncorrectUserDataException.class)
     public ModelAndView handlerIncorrectDataException(Exception ex) {
         ModelMap modelMap = new ModelMap();
         modelMap.addAttribute(RequestParamsEnum.ERROR_PARAM.getValue(),
@@ -43,10 +43,26 @@ public class GlobalControllerExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler({SQLException.class})
+    @ExceptionHandler(SQLException.class)
     public ModelAndView handlerDBConnectionException() {
         ModelMap modelMap = new ModelMap();
         modelMap.addAttribute(RequestParamsEnum.ERROR_PARAM.getValue(), InfoEnum.SERVER_ERROR_INFO.getInfo());
+        return new ModelAndView(PagesPathEnum.ERROR_PAGE.getPath(), modelMap);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ParsingException.class)
+    public ModelAndView handlerParsingException(Exception ex) {
+        ModelMap modelMap = new ModelMap();
+        modelMap.addAttribute(RequestParamsEnum.ERROR_PARAM.getValue(), ex.getMessage());
+        return new ModelAndView(PagesPathEnum.ERROR_PAGE.getPath(), modelMap);
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(ExportToFIleException.class)
+    public ModelAndView handlerWritingToFileException(Exception ex) {
+        ModelMap modelMap = new ModelMap();
+        modelMap.addAttribute(RequestParamsEnum.ERROR_PARAM.getValue(), ex.getMessage());
         return new ModelAndView(PagesPathEnum.ERROR_PAGE.getPath(), modelMap);
     }
 }

@@ -5,13 +5,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,19 +26,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class Product extends BaseEntity{
-    @NotBlank(message = "Поле должно быть заполнено!")
-    @Size(min = 3, max = 100, message = "Имя продукта не может содержать меньше 3 и больше 100 символов.")
+public class Product extends BaseEntity {
     @Column(name = "name")
     private String name;
 
-    @NotBlank(message = "Поле должно быть заполнено!")
-    @Size(min = 5, message = "Описание продукта не может содержать меньше 5 символов.")
     @Column(name = "description")
     private String description;
 
-    @NotBlank(message = "Поле должно быть заполнено!")
-    @Min(value = 0)
     @Column(name = "price")
     private double price;
 
@@ -50,7 +42,9 @@ public class Product extends BaseEntity{
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "product", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "products_images", joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "images_id"))
     private List<Image> images;
 
     @ToString.Exclude

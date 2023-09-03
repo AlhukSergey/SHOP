@@ -3,11 +3,13 @@ package by.teachmeskills.shop.repositories.Impl;
 import by.teachmeskills.shop.domain.Image;
 import by.teachmeskills.shop.repositories.ImageRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Transactional
 @Repository
@@ -33,24 +35,13 @@ public class ImageRepositoryImpl implements ImageRepository {
 
     @Override
     public void delete(int id) {
-        Image image = entityManager.find(Image.class, id);
+        Image image = Optional.ofNullable(entityManager.find(Image.class, id))
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Изображение с id %d не найдено.", id)));
         entityManager.remove(image);
     }
 
     @Override
     public Image findById(int id) {
         return entityManager.find(Image.class, id);
-    }
-
-    @Override
-    public Image findByCategoryId(int categoryId) {
-        return entityManager.createQuery("select i from Image i where i.category.id=:category_id", Image.class)
-                .setParameter("category_id", categoryId).getSingleResult();
-    }
-
-    @Override
-    public List<Image> findByProductId(int productId) {
-        return entityManager.createQuery("select i from Image i where i.product.id=:product_id", Image.class)
-                .setParameter("product_id", productId).getResultList();
     }
 }

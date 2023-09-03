@@ -1,21 +1,30 @@
 package by.teachmeskills.shop.controllers;
 
+import by.teachmeskills.shop.csv.OrderCsv;
 import by.teachmeskills.shop.domain.PasswordForm;
 import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.PagesPathEnum;
+import by.teachmeskills.shop.exceptions.ExportToFIleException;
 import by.teachmeskills.shop.exceptions.IncorrectUserDataException;
+import by.teachmeskills.shop.services.OrderService;
 import by.teachmeskills.shop.services.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.List;
 import java.util.Objects;
 
 import static by.teachmeskills.shop.enums.ShopConstants.USER;
@@ -25,9 +34,11 @@ import static by.teachmeskills.shop.enums.ShopConstants.USER;
 @RequestMapping("/account")
 public class UserAccountController {
     private final UserService userService;
+    private final OrderService orderService;
 
-    public UserAccountController(UserService userService) {
+    public UserAccountController(UserService userService, OrderService orderService) {
         this.userService = userService;
+        this.orderService = orderService;
     }
 
     @GetMapping
@@ -75,5 +86,15 @@ public class UserAccountController {
             modelAndView.addObject(field + "Error", Objects.requireNonNull(bindingResult.getFieldError(field))
                     .getDefaultMessage());
         }
+    }
+
+    @PostMapping("/toBD")
+    public ResponseEntity<List<OrderCsv>> uploadCategoriesFromFile(@RequestParam("file") MultipartFile file) throws Exception {
+        return new ResponseEntity<>(orderService.saveOrdersFromFile(file), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/toFile/{userId}/{fileName}")
+    public ResponseEntity<String> uploadCategoriesFromBD(@PathVariable int userId, @PathVariable String fileName) throws ExportToFIleException {
+        return new ResponseEntity<>(orderService.saveUserOrdersFromBD(userId, fileName), HttpStatus.CREATED);
     }
 }

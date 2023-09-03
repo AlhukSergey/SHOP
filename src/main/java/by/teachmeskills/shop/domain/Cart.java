@@ -1,16 +1,23 @@
 package by.teachmeskills.shop.domain;
 
+import by.teachmeskills.shop.exceptions.EntityNotFoundException;
+import lombok.Getter;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class Cart {
     private final Map<Integer, Product> products;
-    private int totalPrice = 0;
+    @Getter
+    private double totalPrice;
 
     public Cart() {
         this.products = new HashMap<>();
+        this.totalPrice = 0;
     }
 
     public void addProduct(Product product) {
@@ -18,18 +25,16 @@ public class Cart {
         totalPrice += product.getPrice();
     }
 
-    public void removeProduct(int productId) {
-        Product product = products.get(productId);
-        products.remove(productId);
-        totalPrice -= product.getPrice();
-    }
-
     public List<Product> getProducts() {
         return new ArrayList<>(products.values());
     }
 
-    public int getTotalPrice() {
-        return totalPrice;
+    public void removeProduct(int productId) throws EntityNotFoundException {
+        if (!products.containsKey(productId))
+            throw new EntityNotFoundException("Продукта с id %d не найдено.");
+        Product product = products.get(productId);
+        products.remove(productId);
+        totalPrice -= product.getPrice();
     }
 
     public void clear() {

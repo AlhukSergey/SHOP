@@ -17,7 +17,6 @@ public class StatisticRepositoryImpl extends StatisticRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
-
     @Override
     public Statistic create(Statistic entity) {
         entityManager.persist(entity);
@@ -27,11 +26,6 @@ public class StatisticRepositoryImpl extends StatisticRepository {
     @Override
     public List<Statistic> read() {
         return entityManager.createQuery("select s from S s ", Statistic.class).getResultList();
-    }
-
-    @Override
-    public Statistic update(Statistic entity) {
-        return entityManager.merge(entity);
     }
 
     @Override

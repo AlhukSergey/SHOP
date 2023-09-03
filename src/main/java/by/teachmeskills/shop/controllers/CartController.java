@@ -30,6 +30,7 @@ public class CartController {
     public ModelAndView addProductToCart(@RequestParam(ShopConstants.PRODUCT_ID_PARAM) String id, @ModelAttribute(SHOPPING_CART) Cart shopCart) throws EntityNotFoundException {
         return cartService.addProductToCart(id, shopCart);
     }
+
     @GetMapping("/remove")
     public ModelAndView removeProductFromCart(@RequestParam(ShopConstants.PRODUCT_ID_PARAM) String id, @ModelAttribute(SHOPPING_CART) Cart shopCart) throws EntityNotFoundException {
         return cartService.removeProductFromCart(id, shopCart);

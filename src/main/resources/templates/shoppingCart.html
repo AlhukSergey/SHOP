@@ -59,10 +59,10 @@
         <div class="card w-25 m-1" th:each="product : ${cartProductsList}">
             <div class="card-body d-flex flex-column justify-content-between">
                 <div>
-                    <th:block th:each="image : ${images}">
+                    <th:block th:each="image : ${product.images}">
                         <img class="card-img card-scale" style="max-height:300px"
                              th:src="${image.imagePath}" alt="Card image"
-                             th:if="${product.id == image.product.id and image.primary == 1}">
+                             th:if="${image.primary == 1}">
                     </th:block>
                     <p th:text="${product.description}">Описание продукта</p>
                 </div>

@@ -17,8 +17,6 @@ import by.teachmeskills.shop.exceptions.RegistrationException;
 import by.teachmeskills.shop.exceptions.UserAlreadyExistsException;
 import by.teachmeskills.shop.repositories.CategoryRepository;
 import by.teachmeskills.shop.repositories.UserRepository;
-import by.teachmeskills.shop.services.CategoryService;
-import by.teachmeskills.shop.services.ImageService;
 import by.teachmeskills.shop.services.OrderService;
 import by.teachmeskills.shop.services.UserService;
 import by.teachmeskills.shop.utils.EncryptionUtils;
@@ -36,15 +34,11 @@ import static by.teachmeskills.shop.enums.RequestParamsEnum.IMAGES;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final CategoryService categoryService;
-    private final ImageService imageService;
     private final OrderService orderService;
     private final CategoryRepository categoryRepository;
 
-    public UserServiceImpl(UserRepository userRepository, CategoryService categoryService, ImageService imageService, OrderService orderService, CategoryRepository categoryRepository) {
+    public UserServiceImpl(UserRepository userRepository, OrderService orderService, CategoryRepository categoryRepository) {
         this.userRepository = userRepository;
-        this.categoryService = categoryService;
-        this.imageService = imageService;
         this.orderService = orderService;
         this.categoryRepository = categoryRepository;
     }
@@ -65,7 +59,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delete(int id) {
+    public void delete(int id) throws EntityNotFoundException {
         userRepository.delete(id);
     }
 
@@ -88,11 +82,6 @@ public class UserServiceImpl implements UserService {
 
             if (loggedUser != null) {
                 List<Category> categories = categoryRepository.findPaginatedCategories(0, ShopConstants.PAGE_SIZE);
-                List<Image> images = new ArrayList<>();
-
-                for (Category category : categories) {
-                    images.add(imageService.getImageByCategoryId(category.getId()));
-                }
 
                 Long totalItems = categoryRepository.getTotalItems();
                 int totalPages = (int) (Math.ceil(totalItems / ShopConstants.PAGE_SIZE));
@@ -100,7 +89,6 @@ public class UserServiceImpl implements UserService {
                 model.addAttribute("currentPage", 1);
                 model.addAttribute("totalPages", totalPages);
                 model.addAttribute(CATEGORIES.getValue(), categories);
-                model.addAttribute(IMAGES.getValue(), images);
                 model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.WELCOME_INFO.getInfo() + loggedUser.getName() + ".");
                 model.addAttribute(RequestParamsEnum.USER.getValue(), loggedUser);
 
@@ -113,7 +101,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ModelAndView createUser(User user) throws RegistrationException, EntityNotFoundException {
+    public ModelAndView createUser(User user) throws RegistrationException {
         if (checkUserAlreadyExists(user.getEmail(), user.getPassword())) {
             user.setPassword(EncryptionUtils.encrypt(user.getPassword()));
             User createdUser = create(user);
@@ -125,7 +113,7 @@ public class UserServiceImpl implements UserService {
                 List<Category> categories = categoryRepository.findPaginatedCategories(0, ShopConstants.PAGE_SIZE);
 
                 for (Category category : categories) {
-                    images.add(imageService.getImageByCategoryId(category.getId()));
+                    images.add(category.getImage());
                 }
 
                 Long totalItems = categoryRepository.getTotalItems();
@@ -184,7 +172,7 @@ public class UserServiceImpl implements UserService {
         return new ModelAndView(PagesPathEnum.USER_ACCOUNT_PAGE.getPath(), model);
     }
 
-    private boolean checkUserAlreadyExists(String email, String password){
+    private boolean checkUserAlreadyExists(String email, String password) {
         try {
             User existUser = getUserByEmailAndPassword(email, password);
             return existUser == null;

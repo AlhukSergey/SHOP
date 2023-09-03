@@ -21,6 +21,7 @@ public interface UserService extends BaseService<User> {
     ModelAndView updateData(User user);
 
     ModelAndView updatePassword(User user, @Valid PasswordForm passwords) throws IncorrectUserDataException;
+
     ModelAndView generateAccountPage(User user);
 }
 

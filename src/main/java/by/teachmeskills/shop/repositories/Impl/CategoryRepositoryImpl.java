@@ -3,11 +3,13 @@ package by.teachmeskills.shop.repositories.Impl;
 import by.teachmeskills.shop.domain.Category;
 import by.teachmeskills.shop.repositories.CategoryRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Transactional
 @Repository
@@ -33,7 +35,8 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
     @Override
     public void delete(int id) {
-        Category category = entityManager.find(Category.class, id);
+        Category category = Optional.ofNullable(entityManager.find(Category.class, id))
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Категории с id %d не найдено.", id)));
         entityManager.remove(category);
     }
 

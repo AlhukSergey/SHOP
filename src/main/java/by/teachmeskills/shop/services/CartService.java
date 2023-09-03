@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,15 +28,13 @@ import static by.teachmeskills.shop.enums.RequestParamsEnum.IMAGES;
 public class CartService {
     private final ProductRepository productRepository;
     private final OrderService orderService;
-    private final ImageService imageService;
 
-    public CartService(ProductRepository productRepository, OrderService orderService, ImageService imageService) {
+    public CartService(ProductRepository productRepository, OrderService orderService) {
         this.productRepository = productRepository;
         this.orderService = orderService;
-        this.imageService = imageService;
     }
 
-    public ModelAndView addProductToCart(String id, Cart shopCart) throws EntityNotFoundException {
+    public ModelAndView addProductToCart(String id, Cart shopCart) {
         ModelMap model = new ModelMap();
 
         int productId = Integer.parseInt(id);
@@ -43,7 +42,7 @@ public class CartService {
         shopCart.addProduct(product);
 
         model.addAttribute(RequestParamsEnum.PRODUCT.getValue(), product);
-        model.addAttribute(RequestParamsEnum.IMAGES.getValue(), imageService.getImagesByProductId(productId));
+        model.addAttribute(RequestParamsEnum.IMAGES.getValue(), product.getImages());
 
         return new ModelAndView(PagesPathEnum.PRODUCT_PAGE.getPath(), model);
     }
@@ -57,7 +56,7 @@ public class CartService {
         List<List<Image>> images = new ArrayList<>();
 
         for (Product product : products) {
-            images.add(imageService.getImagesByProductId(product.getId()));
+            images.add(product.getImages());
         }
 
         model.addAttribute(RequestParamsEnum.SHOPPING_CART_PRODUCTS.getValue(), products);
@@ -66,14 +65,14 @@ public class CartService {
         return new ModelAndView(PagesPathEnum.SHOPPING_CART_PAGE.getPath(), model);
     }
 
-    public ModelAndView showCartProductList(Cart shopCart) throws EntityNotFoundException {
+    public ModelAndView showCartProductList(Cart shopCart) {
         ModelMap model = new ModelMap();
 
         List<Product> products = shopCart.getProducts();
         List<List<Image>> images = new ArrayList<>();
 
         for (Product product : products) {
-            images.add(imageService.getImagesByProductId(product.getId()));
+            images.add(product.getImages());
         }
 
         model.addAttribute(RequestParamsEnum.SHOPPING_CART_PRODUCTS.getValue(), products);
@@ -93,7 +92,7 @@ public class CartService {
         }
 
         Order order = Order.builder()
-                .createdAt(LocalDateTime.now())
+                .createdAt(Timestamp.valueOf(LocalDateTime.now()))
                 .orderStatus(OrderStatus.ACTIVE)
                 .price(shopCart.getTotalPrice())
                 .products(productList)
