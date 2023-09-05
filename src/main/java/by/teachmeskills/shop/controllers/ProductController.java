@@ -28,12 +28,12 @@ public class ProductController {
     }
 
     @PostMapping("/csv/import")
-    public ModelAndView uploadCategoriesFromFile(@RequestParam("file") MultipartFile file) throws Exception {
+    public ModelAndView importProductsFromCsv(@RequestParam("file") MultipartFile file) throws Exception {
         return productService.saveProductsFromFile(file);
     }
 
     @GetMapping("/csv/export/{categoryId}")
-    public void uploadProductsFromBD(HttpServletResponse response, @PathVariable int categoryId) throws ExportToFIleException {
+    public void exportProductsToCsv(HttpServletResponse response, @PathVariable int categoryId) throws ExportToFIleException {
         productService.saveProductsFromBD(response, categoryId);
     }
 }

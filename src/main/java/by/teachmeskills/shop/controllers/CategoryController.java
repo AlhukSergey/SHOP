@@ -28,12 +28,12 @@ public class CategoryController {
     }
 
     @PostMapping("/csv/import")
-    public ModelAndView uploadCategoriesFromFile(@RequestParam("file") MultipartFile file) {
+    public ModelAndView importCategoriesFromCsv(@RequestParam("file") MultipartFile file) {
         return categoryService.saveCategoriesFromFile(file);
     }
 
     @GetMapping("/csv/export")
-    public void uploadCategoriesFromBD(HttpServletResponse response) throws ExportToFIleException {
+    public void exportCategoriesToCsv(HttpServletResponse response) throws ExportToFIleException {
         categoryService.saveCategoriesFromBD(response);
     }
 }
