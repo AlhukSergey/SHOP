@@ -27,7 +27,7 @@ public class CartController {
     }
 
     @GetMapping("/add")
-    public ModelAndView addProductToCart(@RequestParam(ShopConstants.PRODUCT_ID_PARAM) String id, @ModelAttribute(SHOPPING_CART) Cart shopCart) throws EntityNotFoundException {
+    public ModelAndView addProductToCart(@RequestParam(ShopConstants.PRODUCT_ID_PARAM) String id, @ModelAttribute(SHOPPING_CART) Cart shopCart) {
         return cartService.addProductToCart(id, shopCart);
     }
 
@@ -37,7 +37,7 @@ public class CartController {
     }
 
     @GetMapping("/open")
-    public ModelAndView redirectToShoppingCart(@ModelAttribute(SHOPPING_CART) Cart shopCart) throws EntityNotFoundException {
+    public ModelAndView redirectToShoppingCart(@ModelAttribute(SHOPPING_CART) Cart shopCart) {
         return cartService.showCartProductList(shopCart);
     }
 

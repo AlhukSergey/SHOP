@@ -1,6 +1,6 @@
 package by.teachmeskills.shop.csv.converters;
 
-import by.teachmeskills.shop.csv.OrderCsv;
+import by.teachmeskills.shop.csv.dto.OrderCsv;
 import by.teachmeskills.shop.domain.Order;
 import by.teachmeskills.shop.domain.OrderStatus;
 import by.teachmeskills.shop.repositories.UserRepository;

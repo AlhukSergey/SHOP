@@ -1,9 +1,11 @@
 package by.teachmeskills.shop.services;
 
-import by.teachmeskills.shop.csv.OrderCsv;
 import by.teachmeskills.shop.domain.Order;
+import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.exceptions.ExportToFIleException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,7 +17,7 @@ public interface OrderService extends BaseService<Order> {
 
     List<Order> getOrdersByUserId(int id);
 
-    List<OrderCsv> saveOrdersFromFile(MultipartFile file) throws Exception;
+    ModelAndView saveOrdersFromFile(MultipartFile file, User user);
 
-    String saveUserOrdersFromBD(int userId, String fileName) throws ExportToFIleException;
+    void saveUserOrdersFromBD(HttpServletResponse response, int userId) throws ExportToFIleException;
 }

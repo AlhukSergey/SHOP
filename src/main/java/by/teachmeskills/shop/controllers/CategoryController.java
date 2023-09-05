@@ -1,11 +1,9 @@
 package by.teachmeskills.shop.controllers;
 
-import by.teachmeskills.shop.csv.CategoryCsv;
 import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.exceptions.ExportToFIleException;
 import by.teachmeskills.shop.services.CategoryService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/category")
@@ -31,13 +27,13 @@ public class CategoryController {
         return categoryService.getCategoryById(id);
     }
 
-    @PostMapping("/toBD")
-    public ResponseEntity<List<CategoryCsv>> uploadCategoriesFromFile(@RequestParam("file") MultipartFile file) {
-        return new ResponseEntity<>(categoryService.saveCategoriesFromFile(file), HttpStatus.CREATED);
+    @PostMapping("/csv/import")
+    public ModelAndView uploadCategoriesFromFile(@RequestParam("file") MultipartFile file) {
+        return categoryService.saveCategoriesFromFile(file);
     }
 
-    @GetMapping("/toFile/{fileName}")
-    public ResponseEntity<String> uploadCategoriesFromBD(@PathVariable String fileName) throws ExportToFIleException {
-        return new ResponseEntity<>(categoryService.saveCategoriesFromBD(fileName), HttpStatus.CREATED);
+    @GetMapping("/csv/export")
+    public void uploadCategoriesFromBD(HttpServletResponse response) throws ExportToFIleException {
+        categoryService.saveCategoriesFromBD(response);
     }
 }

@@ -1,21 +1,21 @@
-package by.teachmeskills.shop.csv;
+package by.teachmeskills.shop.csv.dto;
 
 import com.opencsv.bean.CsvBindByName;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class UserCsv extends BaseCsv {
+public class UserCsv {
+    private int id;
+
     @CsvBindByName
     private String name;
 

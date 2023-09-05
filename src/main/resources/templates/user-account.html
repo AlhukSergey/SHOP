@@ -92,6 +92,20 @@
                     <button id="formDataBtn" type="submit" class="btn btn-primary"
                             onclick="dateChanged()">Сохранить</button>
                 </form>
+
+                <div class="d-flex d-flex justify-content-around">
+                    <form method="post" action="/account/csv/import" enctype="multipart/form-data" >
+                        <div class="form-group">
+                            <label for="file">Добавить новые заказы:</label>
+                            <input type="file" class="form-control" id="file" name="file" size="50" required>
+                        </div>
+                        <button id="downloadBtn" type="submit" class="btn btn-primary">Загрузить</button>
+                    </form>
+                    <div>
+                        <p>Сохранить все заказы пользователя в файл:</p>
+                        <a class="btn btn-primary" th:href="@{'/account/csv/export/' + ${user_id}}" onclick="ordersDownloadedFromDBMsg()">Сохранить</a>
+                    </div>
+                </div>
             </div>
 
             <div class="changePass" id="content-2">
@@ -157,6 +171,11 @@
 <script>
     function dateChanged() {
         window.confirm("Данные успешно изменены!");
+    }
+</script>
+<script>
+    function ordersDownloadedFromDBMsg() {
+        window.confirm("Все заказы пользователя успешно сохранены в файл!")
     }
 </script>
 </body>

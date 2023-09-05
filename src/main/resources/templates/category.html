@@ -56,6 +56,7 @@
 <div class="container">
     <h1 style="text-align: center" th:text="${categoryName}">Название категории</h1>
     <p>Товары в наличии</p>
+    <span th:text="${info}">Информация</span>
     <div class="container-fluid">
         <div class="row">
             <div class="card w-25 m-1" th:each="product : ${products}">
@@ -73,10 +74,29 @@
             </div>
         </div>
     </div>
+
+    <div class="d-flex d-flex justify-content-around">
+        <form method="post" action="/product/csv/import" enctype="multipart/form-data" >
+            <div class="form-group">
+                <label for="file">Добавить новые продукты:</label>
+                <input type="file" class="form-control" id="file" name="file" size="50" required>
+            </div>
+            <button id="downloadBtn" type="submit" class="btn btn-primary">Загрузить</button>
+        </form>
+        <div>
+            <p>Сохранить продукты текущей категории в файл:</p>
+            <a class="btn btn-primary" th:href="@{'/product/csv/export/' + ${category_id}}" onclick="productsDownloadedFromDBMsg()">Сохранить</a>
+        </div>
+    </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous">
+</script>
+<script>
+    function productsDownloadedFromDBMsg() {
+        window.confirm("Существующие продукты текущей категории успешно сохранены в файл!")
+    }
 </script>
 </body>
 </html>

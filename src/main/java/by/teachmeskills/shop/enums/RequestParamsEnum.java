@@ -29,7 +29,8 @@ public enum RequestParamsEnum {
     FINISHED_ORDERS("finishedOrders"),
     SEARCH_PARAM("search_param"),
     ERROR_PARAM("error"),
-    TIME_IN_MILLIS_PARAM("timeInMillis"),;
+    TIME_IN_MILLIS_PARAM("timeInMillis"),
+    USER_ID("user_id");
 
     private final String value;
 

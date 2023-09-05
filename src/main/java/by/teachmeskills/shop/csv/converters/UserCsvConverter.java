@@ -1,6 +1,6 @@
 package by.teachmeskills.shop.csv.converters;
 
-import by.teachmeskills.shop.csv.UserCsv;
+import by.teachmeskills.shop.csv.dto.UserCsv;
 import by.teachmeskills.shop.domain.User;
 import org.springframework.stereotype.Component;
 

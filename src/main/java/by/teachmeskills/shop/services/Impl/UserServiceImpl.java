@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
                 List<Category> categories = categoryRepository.findPaginatedCategories(0, ShopConstants.PAGE_SIZE);
 
                 Long totalItems = categoryRepository.getTotalItems();
-                int totalPages = (int) (Math.ceil(totalItems / ShopConstants.PAGE_SIZE));
+                int totalPages = (int) (Math.ceil((double) totalItems / ShopConstants.PAGE_SIZE));
 
                 model.addAttribute("currentPage", 1);
                 model.addAttribute("totalPages", totalPages);
@@ -117,7 +117,7 @@ public class UserServiceImpl implements UserService {
                 }
 
                 Long totalItems = categoryRepository.getTotalItems();
-                int totalPages = (int) (Math.ceil(totalItems / ShopConstants.PAGE_SIZE));
+                int totalPages = (int) (Math.ceil((double) totalItems / ShopConstants.PAGE_SIZE));
 
                 model.addAttribute("currentPage", 1);
                 model.addAttribute("totalPages", totalPages);
@@ -160,6 +160,7 @@ public class UserServiceImpl implements UserService {
     public ModelAndView generateAccountPage(User user) {
         ModelMap model = new ModelMap();
 
+        model.addAttribute(RequestParamsEnum.USER_ID.getValue(), user.getId());
         model.addAttribute(RequestParamsEnum.NAME.getValue(), user.getName());
         model.addAttribute(RequestParamsEnum.SURNAME.getValue(), user.getSurname());
         model.addAttribute(RequestParamsEnum.BIRTHDAY.getValue(), user.getBirthday().toString());

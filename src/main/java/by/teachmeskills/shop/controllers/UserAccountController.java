@@ -1,6 +1,5 @@
 package by.teachmeskills.shop.controllers;
 
-import by.teachmeskills.shop.csv.OrderCsv;
 import by.teachmeskills.shop.domain.PasswordForm;
 import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.PagesPathEnum;
@@ -8,9 +7,8 @@ import by.teachmeskills.shop.exceptions.ExportToFIleException;
 import by.teachmeskills.shop.exceptions.IncorrectUserDataException;
 import by.teachmeskills.shop.services.OrderService;
 import by.teachmeskills.shop.services.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +22,6 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.List;
 import java.util.Objects;
 
 import static by.teachmeskills.shop.enums.ShopConstants.USER;
@@ -88,13 +85,13 @@ public class UserAccountController {
         }
     }
 
-    @PostMapping("/toBD")
-    public ResponseEntity<List<OrderCsv>> uploadCategoriesFromFile(@RequestParam("file") MultipartFile file) throws Exception {
-        return new ResponseEntity<>(orderService.saveOrdersFromFile(file), HttpStatus.CREATED);
+    @PostMapping("/csv/import")
+    public ModelAndView uploadCategoriesFromFile(@RequestParam("file") MultipartFile file, User user) {
+        return orderService.saveOrdersFromFile(file, user);
     }
 
-    @GetMapping("/toFile/{userId}/{fileName}")
-    public ResponseEntity<String> uploadCategoriesFromBD(@PathVariable int userId, @PathVariable String fileName) throws ExportToFIleException {
-        return new ResponseEntity<>(orderService.saveUserOrdersFromBD(userId, fileName), HttpStatus.CREATED);
+    @GetMapping("/csv/export/{userId}")
+    public void uploadCategoriesFromBD(HttpServletResponse response, @PathVariable int userId) throws ExportToFIleException {
+        orderService.saveUserOrdersFromBD(response, userId);
     }
 }
