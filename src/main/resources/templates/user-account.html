@@ -93,7 +93,7 @@
                             onclick="dateChanged()">Сохранить</button>
                 </form>
 
-                <div class="d-flex d-flex justify-content-around">
+                <div class="d-flex justify-content-around">
                     <form method="post" action="/account/csv/import" enctype="multipart/form-data" >
                         <div class="form-group">
                             <label for="file">Добавить новые заказы:</label>
@@ -133,10 +133,20 @@
             <div class="activeOrders" id="content-3">
                 <div class="row">
                     <th:block th:if="${not #lists.isEmpty(activeOrders)}">
-                        <div class="card w-25 m-1" th:each="order : ${activeOrders}">
+                        <div class="card col-sm-6" th:each="order : ${activeOrders}">
                             <div class="card-body">
                                 <h5 class="card-title" th:text="${'Заказ №' + order.id + ' - ' + order.createdAt}">Id /
                                     дата заказа</h5>
+                                <div class="d-flex justify-content-between">
+                                    <th:block th:each="product : ${order.products}">
+                                        <a th:href="@{'/product/' + ${product.id}}">
+                                            <th:block th:each="image : ${product.images}">
+                                                <img class="card-img" style="max-height:150px" th:src="${image.imagePath}"
+                                                     th:if="${image.primary == 1}" alt="Card image">
+                                            </th:block>
+                                        </a>
+                                    </th:block>
+                                </div>
                                 <div>Активный</div>
                                 <div th:text="${order.price + ' р.'}">Стоимость заказа</div>
                             </div>
@@ -151,10 +161,20 @@
             <div class="finishedOrders" id="content-4">
                 <div class="row">
                     <th:block th:if="${not #lists.isEmpty(finishedOrders)}">
-                        <div class="card w-25 m-1" th:each="order : ${finishedOrders}">
+                        <div class="card col-sm-6" th:each="order : ${finishedOrders}">
                             <div class="card-body">
                                 <h5 class="card-title" th:text="${'Заказ №' + order.id + ' - ' + order.createdAt}">Id /
                                     дата заказа</h5>
+                                <div class="d-flex justify-content-between">
+                                    <th:block th:each="product : ${order.products}">
+                                        <a th:href="@{'/product/' + ${product.id}}">
+                                            <th:block th:each="image : ${product.images}">
+                                                <img class="card-img" style="max-height:150px" th:src="${image.imagePath}"
+                                                     th:if="${image.primary == 1}" alt="Card image">
+                                            </th:block>
+                                        </a>
+                                    </th:block>
+                                </div>
                                 <div>Завершённый</div>
                                 <div th:text="${order.price + ' р.'}">Стоимость заказа</div>
                             </div>
