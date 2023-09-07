@@ -29,11 +29,11 @@ public class CategoryController {
 
     @PostMapping("/csv/import")
     public ModelAndView importCategoriesFromCsv(@RequestParam("file") MultipartFile file) {
-        return categoryService.saveCategoriesFromFile(file);
+        return categoryService.importCategoriesFromCsv(file);
     }
 
     @GetMapping("/csv/export")
     public void exportCategoriesToCsv(HttpServletResponse response) throws ExportToFIleException {
-        categoryService.saveCategoriesFromBD(response);
+        categoryService.exportCategoriesToCsv(response);
     }
 }

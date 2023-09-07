@@ -14,7 +14,7 @@ public interface CategoryService extends BaseService<Category> {
 
     ModelAndView getPaginatedCategories(int currentPage) throws EntityNotFoundException;
 
-    ModelAndView saveCategoriesFromFile(MultipartFile file);
+    ModelAndView importCategoriesFromCsv(MultipartFile file);
 
-    void saveCategoriesFromBD(HttpServletResponse response) throws ExportToFIleException;
+    void exportCategoriesToCsv(HttpServletResponse response) throws ExportToFIleException;
 }

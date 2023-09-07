@@ -137,7 +137,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public ModelAndView saveCategoriesFromFile(MultipartFile file) {
+    public ModelAndView importCategoriesFromCsv(MultipartFile file) {
         ModelMap model = new ModelMap();
 
         List<CategoryCsv> csvCategories = parseCsv(file);
@@ -164,7 +164,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void saveCategoriesFromBD(HttpServletResponse response) throws ExportToFIleException {
+    public void exportCategoriesToCsv(HttpServletResponse response) throws ExportToFIleException {
         response.setContentType("text/csv");
 
         String headerKey = "Content-Disposition";
