@@ -3,12 +3,10 @@ package by.teachmeskills.shop.services;
 import by.teachmeskills.shop.domain.BaseEntity;
 import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 
-import java.util.List;
-
 public interface BaseService<T extends BaseEntity> {
     T create(T entity);
 
-    List<T> read();
+    void read();
 
     T update(T entity);
 
