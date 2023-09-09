@@ -2,19 +2,23 @@ package by.teachmeskills.shop.services.Impl;
 
 import by.teachmeskills.shop.csv.converters.ProductCsvConverter;
 import by.teachmeskills.shop.csv.dto.ProductCsv;
-import by.teachmeskills.shop.domain.Image;
 import by.teachmeskills.shop.domain.Product;
+import by.teachmeskills.shop.domain.Search;
 import by.teachmeskills.shop.enums.InfoEnum;
 import by.teachmeskills.shop.enums.PagesPathEnum;
 import by.teachmeskills.shop.enums.RequestParamsEnum;
-import by.teachmeskills.shop.exceptions.EntityNotFoundException;
+import by.teachmeskills.shop.enums.ShopConstants;
 import by.teachmeskills.shop.exceptions.ExportToFIleException;
 import by.teachmeskills.shop.exceptions.ParsingException;
 import by.teachmeskills.shop.repositories.ProductRepository;
+import by.teachmeskills.shop.repositories.ProductSearchSpecification;
 import by.teachmeskills.shop.services.ProductService;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,12 +31,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static by.teachmeskills.shop.enums.RequestParamsEnum.IMAGES;
 import static by.teachmeskills.shop.enums.RequestParamsEnum.PRODUCTS;
@@ -49,54 +50,47 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product create(Product entity) {
-        return productRepository.create(entity);
+        return productRepository.save(entity);
+    }
+
+    public void getProductsByCategoryId(int categoryId) {
+        productRepository.findAllByCategoryId(categoryId);
     }
 
     @Override
-    public List<Product> read() {
-        return productRepository.read();
+    public List<Product> getProductsByCategoryId(int categoryId, Pageable pageable) {
+        return productRepository.findAllByCategoryId(categoryId, pageable).getContent();
     }
 
     @Override
-    public Product update(Product entity) {
-        return productRepository.update(entity);
-    }
-
-    @Override
-    public void delete(int id) throws EntityNotFoundException {
-        productRepository.delete(id);
-    }
-
-    @Override
-    public Product getProductById(int id) {
-        return productRepository.findById(id);
-    }
-
-    @Override
-    public List<Product> getProductsByCategoryId(int categoryId) {
-        return productRepository.findByCategoryId(categoryId);
-    }
-
-    @Override
-    public ModelAndView getProductsBySearchParameter(String parameter) {
+    public ModelAndView getProductsBySearchParameters(Search search, int pageNumber, int pageSize) {
         ModelMap model = new ModelMap();
-        List<Product> products = productRepository.findBySearchParameter(parameter);
 
+        if (search != null) {
+            if (search.getSearchKey() != null || search.getPriceFrom() != null || search.getPriceTo() != null || search.getCategoryName() != null) {
+                if (!search.getSearchKey().isBlank() || !search.getCategoryName().isBlank()) {
+                    Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by("name").ascending());
+                    ProductSearchSpecification productSearchSpecification = new ProductSearchSpecification(search);
+                    List<Product> products = productRepository.findAll(productSearchSpecification, paging).getContent();
 
-        if (!products.isEmpty()) {
-            List<List<Image>> images = new ArrayList<>();
+                    if (!products.isEmpty()) {
+                        long totalItems = productRepository.count(productSearchSpecification);
+                        int totalPages = (int) (Math.ceil((double) totalItems / pageSize));
 
-            for (Product product : products) {
-                images.add(product.getImages());
+                        model.addAttribute(PRODUCTS.getValue(), products);
+                        model.addAttribute(RequestParamsEnum.PRODUCTS.getValue(), products);
+                        model.addAttribute("totalPages", totalPages);
+                        model.addAttribute(RequestParamsEnum.PAGE_NUMBER.getValue(), pageNumber + 1);
+                        model.addAttribute(RequestParamsEnum.PAGE_SIZE.getValue(), ShopConstants.PAGE_SIZE);
+                    } else {
+                        model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.PRODUCTS_NOT_FOUND_INFO.getInfo());
+                    }
+                }
             }
-
-            model.addAttribute(PRODUCTS.getValue(), products);
-            model.addAttribute(IMAGES.getValue(), images.stream().flatMap(Collection::stream).collect(Collectors.toList()));
-
-            return new ModelAndView(PagesPathEnum.SEARCH_PAGE.getPath(), model);
         }
 
-        model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.PRODUCTS_NOT_FOUND_INFO.getInfo());
+        model.addAttribute(RequestParamsEnum.SELECTED_PAGE_SIZE.getValue(), pageSize);
+
         return new ModelAndView(PagesPathEnum.SEARCH_PAGE.getPath(), model);
     }
 
@@ -112,7 +106,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ModelAndView saveProductsFromFile(MultipartFile file) {
+    public ModelAndView importProductsFromCsv(int pageNumber, int pageSize, MultipartFile file) {
         ModelMap model = new ModelMap();
 
         List<ProductCsv> csvProducts = parseCsv(file);
@@ -122,11 +116,13 @@ public class ProductServiceImpl implements ProductService {
                         .toList())
                 .orElse(null);
         if (Optional.ofNullable(newProducts).isPresent()) {
-            newProducts.forEach(productRepository::create);
+            newProducts.forEach(productRepository::save);
             model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.PRODUCTS_SUCCESSFUL_ADDED_INFO.getInfo());
             int categoryId = newProducts.get(0).getCategory().getId();
 
-            List<Product> products = productRepository.findByCategoryId(categoryId);
+            Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by("name").ascending());
+            List<Product> products = productRepository.findAllByCategoryId(categoryId, paging).getContent();
+
             model.addAttribute(PRODUCTS.getValue(), products);
         }
 
@@ -134,7 +130,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void saveProductsFromBD(HttpServletResponse response, int categoryId) throws ExportToFIleException {
+    public void exportProductsToCsv(HttpServletResponse response, int categoryId) throws ExportToFIleException {
         response.setContentType("text/csv");
 
         String headerKey = "Content-Disposition";
@@ -142,7 +138,7 @@ public class ProductServiceImpl implements ProductService {
         response.setHeader(headerKey, headerValue);
         response.setCharacterEncoding("UTF-8");
 
-        List<ProductCsv> csvProducts = productRepository.findByCategoryId(categoryId).stream().map(productConverter::toCsv).toList();
+        List<ProductCsv> csvProducts = productRepository.findAllByCategoryId(categoryId).stream().map(productConverter::toCsv).toList();
 
         try (ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE)) {
             String[] csvHeader = {"Product ID", "Name", "Descriptions", "Price", "Category ID", "Images"};

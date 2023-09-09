@@ -37,7 +37,7 @@ public class CartController {
     }
 
     @GetMapping("/open")
-    public ModelAndView redirectToShoppingCart(@ModelAttribute(SHOPPING_CART) Cart shopCart) {
+    public ModelAndView openShopCart(@ModelAttribute(SHOPPING_CART) Cart shopCart) {
         return cartService.showCartProductList(shopCart);
     }
 

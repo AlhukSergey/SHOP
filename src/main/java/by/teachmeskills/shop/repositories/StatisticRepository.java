@@ -1,27 +1,9 @@
 package by.teachmeskills.shop.repositories;
 
 import by.teachmeskills.shop.domain.Statistic;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
-public class StatisticRepository implements BaseRepository<Statistic> {
-    @Override
-    public Statistic create(Statistic entity) {
-        return null;
-    }
-
-    @Override
-    public List<Statistic> read() {
-        return null;
-    }
-
-    @Override
-    public Statistic update(Statistic entity) {
-        return null;
-    }
-
-    @Override
-    public void delete(int id) {
-
-    }
+@Repository
+public interface StatisticRepository extends JpaRepository<Statistic, Integer> {
 }

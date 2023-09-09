@@ -1,13 +1,9 @@
 package by.teachmeskills.shop.repositories;
 
 import by.teachmeskills.shop.domain.Category;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
-public interface CategoryRepository extends BaseRepository<Category> {
-    Category findById(int id);
-
-    List<Category> findPaginatedCategories(int first, int count);
-
-    Long getTotalItems();
+@Repository
+public interface CategoryRepository extends JpaRepository<Category, Integer> {
 }

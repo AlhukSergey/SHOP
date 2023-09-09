@@ -1,7 +1,6 @@
 package by.teachmeskills.shop.services;
 
 import by.teachmeskills.shop.domain.Cart;
-import by.teachmeskills.shop.domain.Image;
 import by.teachmeskills.shop.domain.Order;
 import by.teachmeskills.shop.domain.OrderStatus;
 import by.teachmeskills.shop.domain.Product;
@@ -17,12 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static by.teachmeskills.shop.enums.RequestParamsEnum.IMAGES;
 
 @Service
 public class CartService {
@@ -42,8 +36,6 @@ public class CartService {
         shopCart.addProduct(product);
 
         model.addAttribute(RequestParamsEnum.PRODUCT.getValue(), product);
-        model.addAttribute(RequestParamsEnum.IMAGES.getValue(), product.getImages());
-
         return new ModelAndView(PagesPathEnum.PRODUCT_PAGE.getPath(), model);
     }
 
@@ -51,17 +43,9 @@ public class CartService {
         ModelMap model = new ModelMap();
 
         shopCart.removeProduct(Integer.parseInt(productId));
-
         List<Product> products = shopCart.getProducts();
-        List<List<Image>> images = new ArrayList<>();
-
-        for (Product product : products) {
-            images.add(product.getImages());
-        }
 
         model.addAttribute(RequestParamsEnum.SHOPPING_CART_PRODUCTS.getValue(), products);
-        model.addAttribute(IMAGES.getValue(), images.stream().flatMap(Collection::stream).collect(Collectors.toList()));
-
         return new ModelAndView(PagesPathEnum.SHOPPING_CART_PAGE.getPath(), model);
     }
 
@@ -69,15 +53,8 @@ public class CartService {
         ModelMap model = new ModelMap();
 
         List<Product> products = shopCart.getProducts();
-        List<List<Image>> images = new ArrayList<>();
-
-        for (Product product : products) {
-            images.add(product.getImages());
-        }
 
         model.addAttribute(RequestParamsEnum.SHOPPING_CART_PRODUCTS.getValue(), products);
-        model.addAttribute(IMAGES.getValue(), images.stream().flatMap(Collection::stream).collect(Collectors.toList()));
-
         return new ModelAndView(PagesPathEnum.SHOPPING_CART_PAGE.getPath(), model);
     }
 

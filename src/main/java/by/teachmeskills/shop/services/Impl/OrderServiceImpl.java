@@ -7,7 +7,6 @@ import by.teachmeskills.shop.domain.OrderStatus;
 import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.PagesPathEnum;
 import by.teachmeskills.shop.enums.RequestParamsEnum;
-import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.exceptions.ExportToFIleException;
 import by.teachmeskills.shop.exceptions.ParsingException;
 import by.teachmeskills.shop.repositories.OrderRepository;
@@ -45,22 +44,25 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order create(Order entity) {
-        return orderRepository.create(entity);
+        return orderRepository.save(entity);
     }
 
     @Override
-    public List<Order> read() {
-        return orderRepository.read();
+    public void read() {
+        orderRepository.findAll();
     }
 
     @Override
     public Order update(Order entity) {
-        return orderRepository.update(entity);
+        return orderRepository.save(entity);
     }
 
     @Override
-    public void delete(int id) throws EntityNotFoundException {
-        orderRepository.delete(id);
+    public void delete(int id) {
+        Order order = orderRepository.findById(id);
+        if (order != null) {
+            orderRepository.delete(order);
+        }
     }
 
     @Override
@@ -70,7 +72,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getOrderByDate(LocalDateTime date) {
-        return orderRepository.findByDate(date);
+        return orderRepository.findByCreatedAt(date);
     }
 
     @Override
@@ -96,7 +98,7 @@ public class OrderServiceImpl implements OrderService {
                         .toList())
                 .orElse(null);
         if (Optional.ofNullable(newOrders).isPresent()) {
-            newOrders.forEach(orderRepository::create);
+            newOrders.forEach(orderRepository::save);
         }
 
         List<Order> orders = getOrdersByUserId(user.getId());

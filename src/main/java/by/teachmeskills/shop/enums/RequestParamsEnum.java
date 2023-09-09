@@ -30,7 +30,11 @@ public enum RequestParamsEnum {
     SEARCH_PARAM("search_param"),
     ERROR_PARAM("error"),
     TIME_IN_MILLIS_PARAM("timeInMillis"),
-    USER_ID("user_id");
+    USER_ID("user_id"),
+    PAGE_NUMBER("pageNumber"),
+    PAGE_SIZE("pageSize"),
+    SELECTED_PAGE_SIZE("selectedPageSize"),
+    TOTAL_PAGES("totalPages");
 
     private final String value;
 

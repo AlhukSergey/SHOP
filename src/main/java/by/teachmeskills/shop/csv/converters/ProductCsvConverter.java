@@ -3,6 +3,7 @@ package by.teachmeskills.shop.csv.converters;
 import by.teachmeskills.shop.csv.dto.ProductCsv;
 import by.teachmeskills.shop.domain.Product;
 import by.teachmeskills.shop.repositories.CategoryRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -39,7 +40,9 @@ public class ProductCsvConverter {
                         .name(pd.getName())
                         .description(pd.getDescription())
                         .price(pd.getPrice())
-                        .category(categoryRepository.findById(pd.getCategoryId()))
+                        .category(categoryRepository
+                                .findById(pd.getCategoryId())
+                                .orElseThrow(() -> new EntityNotFoundException(String.format("Категории с %d не найдено.", pd.getCategoryId()))))
                         .images(Optional.ofNullable(pd.getImages())
                                 .map(images -> images
                                         .stream()

@@ -1,7 +1,6 @@
 package by.teachmeskills.shop.services.Impl;
 
 import by.teachmeskills.shop.domain.Category;
-import by.teachmeskills.shop.domain.Image;
 import by.teachmeskills.shop.domain.Order;
 import by.teachmeskills.shop.domain.OrderStatus;
 import by.teachmeskills.shop.domain.PasswordForm;
@@ -20,16 +19,15 @@ import by.teachmeskills.shop.repositories.UserRepository;
 import by.teachmeskills.shop.services.OrderService;
 import by.teachmeskills.shop.services.UserService;
 import by.teachmeskills.shop.utils.EncryptionUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static by.teachmeskills.shop.enums.RequestParamsEnum.CATEGORIES;
-import static by.teachmeskills.shop.enums.RequestParamsEnum.IMAGES;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -45,22 +43,27 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User create(User entity) {
-        return userRepository.create(entity);
+        return userRepository.save(entity);
     }
 
     @Override
-    public List<User> read() {
-        return userRepository.read();
+    public void read() {
+        userRepository.findAll();
     }
 
     @Override
     public User update(User entity) {
-        return userRepository.update(entity);
+        return userRepository.save(entity);
     }
 
     @Override
     public void delete(int id) throws EntityNotFoundException {
-        userRepository.delete(id);
+        User user = userRepository.findById(id);
+        if (user != null) {
+            userRepository.delete(user);
+        } else {
+            throw new EntityNotFoundException(String.format("Пользователя с id %d не найдено.", id));
+        }
     }
 
     @Override
@@ -74,21 +77,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ModelAndView authenticate(User user) throws LoginException, IncorrectUserDataException, EntityNotFoundException {
-        ModelMap model = new ModelMap();
-
+    public ModelAndView authenticate(User user) throws LoginException, IncorrectUserDataException {
         if (user != null && user.getEmail() != null && user.getPassword() != null) {
             User loggedUser = userRepository.findByEmailAndPassword(user.getEmail(), EncryptionUtils.encrypt(user.getPassword()));
 
             if (loggedUser != null) {
-                List<Category> categories = categoryRepository.findPaginatedCategories(0, ShopConstants.PAGE_SIZE);
+                ModelMap model = new ModelMap();
 
-                Long totalItems = categoryRepository.getTotalItems();
+                Pageable paging = PageRequest.of(0, ShopConstants.PAGE_SIZE, Sort.by("name").ascending());
+                List<Category> categories = categoryRepository.findAll(paging).getContent();
+                long totalItems = categoryRepository.count();
                 int totalPages = (int) (Math.ceil((double) totalItems / ShopConstants.PAGE_SIZE));
 
-                model.addAttribute("currentPage", 1);
+                model.addAttribute(RequestParamsEnum.PAGE_NUMBER.getValue(), 1);
+                model.addAttribute(RequestParamsEnum.PAGE_SIZE.getValue(), ShopConstants.PAGE_SIZE);
+                model.addAttribute(RequestParamsEnum.SELECTED_PAGE_SIZE.getValue(), ShopConstants.PAGE_SIZE);
                 model.addAttribute("totalPages", totalPages);
-                model.addAttribute(CATEGORIES.getValue(), categories);
+                model.addAttribute(RequestParamsEnum.CATEGORIES.getValue(), categories);
                 model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.WELCOME_INFO.getInfo() + loggedUser.getName() + ".");
                 model.addAttribute(RequestParamsEnum.USER.getValue(), loggedUser);
 
@@ -109,25 +114,19 @@ public class UserServiceImpl implements UserService {
             if (createdUser != null) {
                 ModelMap model = new ModelMap();
 
-                List<Image> images = new ArrayList<>();
-                List<Category> categories = categoryRepository.findPaginatedCategories(0, ShopConstants.PAGE_SIZE);
-
-                for (Category category : categories) {
-                    images.add(category.getImage());
-                }
-
-                Long totalItems = categoryRepository.getTotalItems();
+                Pageable paging = PageRequest.of(0, ShopConstants.PAGE_SIZE, Sort.by("name").ascending());
+                List<Category> categories = categoryRepository.findAll(paging).getContent();
+                long totalItems = categoryRepository.count();
                 int totalPages = (int) (Math.ceil((double) totalItems / ShopConstants.PAGE_SIZE));
 
-                model.addAttribute("currentPage", 1);
+                model.addAttribute(RequestParamsEnum.PAGE_NUMBER.getValue(), 1);
+                model.addAttribute(RequestParamsEnum.PAGE_SIZE.getValue(), ShopConstants.PAGE_SIZE);
+                model.addAttribute(RequestParamsEnum.SELECTED_PAGE_SIZE.getValue(), ShopConstants.PAGE_SIZE);
                 model.addAttribute("totalPages", totalPages);
-                model.addAttribute(CATEGORIES.getValue(), categories);
-                model.addAttribute(IMAGES.getValue(), images);
-
-                model.addAttribute(CATEGORIES.getValue(), categories);
+                model.addAttribute(RequestParamsEnum.CATEGORIES.getValue(), categories);
                 model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.WELCOME_INFO.getInfo() + createdUser.getName() + ".");
+                model.addAttribute(RequestParamsEnum.USER.getValue(), createdUser);
 
-                model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.WELCOME_INFO.getInfo() + createdUser.getName() + ".");
                 return new ModelAndView(PagesPathEnum.HOME_PAGE.getPath(), model);
             }
             throw new RegistrationException("При регистрации нового пользователя произошла ошибка. Попробуйте позже.");

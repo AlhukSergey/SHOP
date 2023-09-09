@@ -1,6 +1,6 @@
 package by.teachmeskills.shop.controllers;
 
-import by.teachmeskills.shop.exceptions.EntityNotFoundException;
+import by.teachmeskills.shop.enums.ShopConstants;
 import by.teachmeskills.shop.exceptions.ExportToFIleException;
 import by.teachmeskills.shop.services.ProductService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,17 +23,19 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ModelAndView openProductPage(@PathVariable int id) throws EntityNotFoundException {
+    public ModelAndView openProductPage(@PathVariable int id) {
         return productService.getProductData(id);
     }
 
     @PostMapping("/csv/import")
-    public ModelAndView importProductsFromCsv(@RequestParam("file") MultipartFile file) throws Exception {
-        return productService.saveProductsFromFile(file);
+    public ModelAndView importProductsFromCsv(@RequestParam("file") MultipartFile file,
+                                              @RequestParam(required = false, defaultValue = "0") Integer pageNumber,
+                                              @RequestParam(required = false, defaultValue = "" + ShopConstants.PAGE_SIZE) Integer pageSize) throws Exception {
+        return productService.importProductsFromCsv(pageNumber, pageSize, file);
     }
 
     @GetMapping("/csv/export/{categoryId}")
     public void exportProductsToCsv(HttpServletResponse response, @PathVariable int categoryId) throws ExportToFIleException {
-        productService.saveProductsFromBD(response, categoryId);
+        productService.exportProductsToCsv(response, categoryId);
     }
 }

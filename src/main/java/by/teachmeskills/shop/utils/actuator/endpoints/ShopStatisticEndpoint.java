@@ -17,6 +17,8 @@ import org.springframework.ui.ModelMap;
 import org.springframework.util.StopWatch;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.Optional;
+
 @Component
 @Endpoint(id = "statistic")
 public class ShopStatisticEndpoint {
@@ -53,12 +55,13 @@ public class ShopStatisticEndpoint {
         productService.getProductsByCategoryId(categoryId);
         stopWatch.stop();
 
-        statisticRepository.create(Statistic.builder()
+        statisticRepository.save(Statistic.builder()
                 .description("To get all category products spent time in seconds " + stopWatch.getTotalTimeSeconds()).build());
     }
 
     @DeleteOperation
     public void deleteOperation(@Selector int id) {
-        statisticRepository.delete(id);
+        Optional<Statistic> statistic = statisticRepository.findById(id);
+        statistic.ifPresent(statisticRepository::delete);
     }
 }

@@ -1,5 +1,6 @@
 package by.teachmeskills.shop.controllers;
 
+import by.teachmeskills.shop.enums.ShopConstants;
 import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.exceptions.ExportToFIleException;
 import by.teachmeskills.shop.services.CategoryService;
@@ -23,13 +24,17 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public ModelAndView openCategoryPage(@PathVariable int id) throws EntityNotFoundException {
-        return categoryService.getCategoryById(id);
+    public ModelAndView openCategoryPage(@PathVariable Integer id,
+                                         @RequestParam(required = false, defaultValue = "0") Integer pageNumber,
+                                         @RequestParam(required = false, defaultValue = "" + ShopConstants.PAGE_SIZE) Integer pageSize) throws EntityNotFoundException {
+        return categoryService.getCategoryById(id, pageNumber, pageSize);
     }
 
     @PostMapping("/csv/import")
-    public ModelAndView importCategoriesFromCsv(@RequestParam("file") MultipartFile file) {
-        return categoryService.importCategoriesFromCsv(file);
+    public ModelAndView importCategoriesFromCsv(@RequestParam("file") MultipartFile file,
+                                                @RequestParam(required = false, defaultValue = "0") Integer pageNumber,
+                                                @RequestParam(required = false, defaultValue = "" + ShopConstants.PAGE_SIZE) Integer pageSize) throws EntityNotFoundException {
+        return categoryService.importCategoriesFromCsv(pageNumber, pageSize, file);
     }
 
     @GetMapping("/csv/export")

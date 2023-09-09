@@ -2,9 +2,11 @@
 <html xmlns:th="http://www.thymeleaf.org/" lang="ru">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+            crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/user-account.css">
     <title>Личный кабинет</title>
@@ -22,11 +24,7 @@
             <div class=" collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav ms-auto ">
                     <li class="nav-item">
-                        <a class="nav-link mx-2 text-uppercase active" aria-current="page"
-                           href="/home/1">Главная</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link mx-2 text-uppercase" href="/home/1">Каталог</a>
+                        <a class="nav-link mx-2 text-uppercase" href="/home">Каталог</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link mx-2 text-uppercase" href="/myPage">О нас</a>
@@ -81,7 +79,8 @@
                     </div>
                     <div class="form-group">
                         <label for="birthday">Дата рождения:</label>
-                        <input type="date" class="form-control w-25" id="birthday" th:value="${birthday}" name="birthday">
+                        <input type="date" class="form-control w-25" id="birthday" th:value="${birthday}"
+                               name="birthday">
                         <span class="error" th:text="${birthdayError}">Ошибка</span>
                     </div>
                     <div class="form-group">
@@ -90,11 +89,12 @@
                         <span class="error" th:text="${emailError}">Ошибка</span>
                     </div>
                     <button id="formDataBtn" type="submit" class="btn btn-primary"
-                            onclick="dateChanged()">Сохранить</button>
+                            onclick="dateChanged()">Сохранить
+                    </button>
                 </form>
 
                 <div class="d-flex justify-content-around">
-                    <form method="post" action="/account/csv/import" enctype="multipart/form-data" >
+                    <form method="post" action="/account/csv/import" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="file">Добавить новые заказы:</label>
                             <input type="file" class="form-control" id="file" name="file" size="50" required>
@@ -103,7 +103,8 @@
                     </form>
                     <div>
                         <p>Сохранить все заказы пользователя в файл:</p>
-                        <a class="btn btn-primary" th:href="@{'/account/csv/export/' + ${user_id}}" onclick="ordersDownloadedFromDBMsg()">Сохранить</a>
+                        <a class="btn btn-primary" th:href="@{'/account/csv/export/' + ${user_id}}"
+                           onclick="ordersDownloadedFromDBMsg()">Сохранить</a>
                     </div>
                 </div>
             </div>
@@ -112,21 +113,25 @@
                 <form method="post" autocomplete="off" action="/account/updatePassword">
                     <div class="form-group">
                         <label for="old_password">Старый пароль:</label>
-                        <input type="text" class="form-control w-25" id="old_password" placeholder="Введите старый пароль" name="oldPassword">
+                        <input type="text" class="form-control w-25" id="old_password"
+                               placeholder="Введите старый пароль" name="oldPassword">
                         <span class="error" th:text="${oldPasswordError}">Ошибка</span>
                     </div>
                     <div class="form-group">
                         <label for="new_password">Новый пароль:</label>
-                        <input type="text" class="form-control w-25" id="new_password" placeholder="Введите новый пароль" name="newPassword">
+                        <input type="text" class="form-control w-25" id="new_password"
+                               placeholder="Введите новый пароль" name="newPassword">
                         <span class="error" th:text="${newPasswordError}">Ошибка</span>
                     </div>
                     <div class="form-group">
                         <label for="new_password_rep">Введите новый пароль повторно:</label>
-                        <input type="text" class="form-control w-25" id="new_password_rep" placeholder="Введите новый пароль повторно" name="newPasswordRep">
+                        <input type="text" class="form-control w-25" id="new_password_rep"
+                               placeholder="Введите новый пароль повторно" name="newPasswordRep">
                         <span class="error" th:text="${newPasswordRepError}">Ошибка</span>
                     </div>
                     <button id="formPassBtn" type="submit" class="btn btn-primary"
-                            onclick="dateChanged()">Сохранить</button>
+                            onclick="dateChanged()">Сохранить
+                    </button>
                 </form>
             </div>
 
@@ -141,7 +146,8 @@
                                     <th:block th:each="product : ${order.products}">
                                         <a th:href="@{'/product/' + ${product.id}}">
                                             <th:block th:each="image : ${product.images}">
-                                                <img class="card-img" style="max-height:150px" th:src="${image.imagePath}"
+                                                <img class="card-img" style="max-height:150px"
+                                                     th:src="${image.imagePath}"
                                                      th:if="${image.primary == 1}" alt="Card image">
                                             </th:block>
                                         </a>
@@ -169,7 +175,8 @@
                                     <th:block th:each="product : ${order.products}">
                                         <a th:href="@{'/product/' + ${product.id}}">
                                             <th:block th:each="image : ${product.images}">
-                                                <img class="card-img" style="max-height:150px" th:src="${image.imagePath}"
+                                                <img class="card-img" style="max-height:150px"
+                                                     th:src="${image.imagePath}"
                                                      th:if="${image.primary == 1}" alt="Card image">
                                             </th:block>
                                         </a>
