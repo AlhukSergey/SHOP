@@ -15,6 +15,7 @@ import by.teachmeskills.shop.repositories.ProductSearchSpecification;
 import by.teachmeskills.shop.services.ProductService;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -68,24 +69,25 @@ public class ProductServiceImpl implements ProductService {
 
         if (search != null) {
             if (search.getSearchKey() != null || search.getPriceFrom() != null || search.getPriceTo() != null || search.getCategoryName() != null) {
-                if (!search.getSearchKey().isBlank() || !search.getCategoryName().isBlank()) {
-                    Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by("name").ascending());
-                    ProductSearchSpecification productSearchSpecification = new ProductSearchSpecification(search);
-                    List<Product> products = productRepository.findAll(productSearchSpecification, paging).getContent();
+                Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by("name").ascending());
+                ProductSearchSpecification productSearchSpecification = new ProductSearchSpecification(search);
+                List<Product> products = productRepository.findAll(productSearchSpecification, paging).getContent();
 
-                    if (!products.isEmpty()) {
-                        long totalItems = productRepository.count(productSearchSpecification);
-                        int totalPages = (int) (Math.ceil((double) totalItems / pageSize));
+                if (!products.isEmpty()) {
+                    long totalItems = productRepository.count(productSearchSpecification);
+                    int totalPages = (int) (Math.ceil((double) totalItems / pageSize));
 
-                        model.addAttribute(PRODUCTS.getValue(), products);
-                        model.addAttribute(RequestParamsEnum.PRODUCTS.getValue(), products);
-                        model.addAttribute("totalPages", totalPages);
-                        model.addAttribute(RequestParamsEnum.PAGE_NUMBER.getValue(), pageNumber + 1);
-                        model.addAttribute(RequestParamsEnum.PAGE_SIZE.getValue(), ShopConstants.PAGE_SIZE);
-                    } else {
-                        model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.PRODUCTS_NOT_FOUND_INFO.getInfo());
-                    }
+                    model.addAttribute(PRODUCTS.getValue(), products);
+                    model.addAttribute(RequestParamsEnum.PRODUCTS.getValue(), products);
+                    model.addAttribute("totalPages", totalPages);
+                    model.addAttribute(RequestParamsEnum.PAGE_NUMBER.getValue(), pageNumber + 1);
+                    model.addAttribute(RequestParamsEnum.PAGE_SIZE.getValue(), ShopConstants.PAGE_SIZE);
+                } else {
+                    model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.PRODUCTS_NOT_FOUND_INFO.getInfo());
                 }
+//                if (!search.getSearchKey().isBlank() || !search.getCategoryName().isBlank()) {
+//
+//                }
             }
         }
 
@@ -97,11 +99,10 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ModelAndView getProductData(int id) {
         ModelMap model = new ModelMap();
-        Product product = productRepository.findById(id);
-        if (product != null) {
-            model.addAttribute(RequestParamsEnum.PRODUCT.getValue(), product);
-            model.addAttribute(IMAGES.getValue(), product.getImages());
-        }
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Продукта с id %d не найдено.", id)));
+        model.addAttribute(RequestParamsEnum.PRODUCT.getValue(), product);
+        model.addAttribute(IMAGES.getValue(), product.getImages());
         return new ModelAndView(PagesPathEnum.PRODUCT_PAGE.getPath(), model);
     }
 

@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
 import org.springframework.boot.autoconfigure.websocket.servlet.WebSocketServletAutoConfiguration;
 import org.springframework.core.env.Environment;
+
 @Slf4j
 @SpringBootApplication(exclude = {
         WebSocketServletAutoConfiguration.class,
@@ -21,7 +22,7 @@ public class ShopApplication {
                         \tApplication '{}' is running! Access URLs:
                         \tLocal: \t\t{}://localhost:{}{}
                         ----------------------------------------------------------""",
-                env.getProperty("spring.application.name"), "http", env.getProperty("server.port"), "/login");
+                env.getProperty("spring.application.name"), "http", env.getProperty("server.port"), "/home");
     }
 
 }

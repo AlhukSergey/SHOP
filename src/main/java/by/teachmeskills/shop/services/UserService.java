@@ -10,9 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.servlet.ModelAndView;
 
 public interface UserService extends BaseService<User> {
-    User getUserById(int id);
-
-    User getUserByEmailAndPassword(String email, String password) throws EntityNotFoundException;
+    User getUserByEmail(String email);
 
     ModelAndView authenticate(User user) throws LoginException, IncorrectUserDataException, EntityNotFoundException;
 
@@ -22,6 +20,6 @@ public interface UserService extends BaseService<User> {
 
     ModelAndView updatePassword(User user, @Valid PasswordForm passwords) throws IncorrectUserDataException;
 
-    ModelAndView generateAccountPage(User user);
+    ModelAndView generateAccountPage(String userEmail);
 }
 

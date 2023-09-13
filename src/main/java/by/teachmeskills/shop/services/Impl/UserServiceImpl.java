@@ -9,7 +9,6 @@ import by.teachmeskills.shop.enums.InfoEnum;
 import by.teachmeskills.shop.enums.PagesPathEnum;
 import by.teachmeskills.shop.enums.RequestParamsEnum;
 import by.teachmeskills.shop.enums.ShopConstants;
-import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.exceptions.IncorrectUserDataException;
 import by.teachmeskills.shop.exceptions.LoginException;
 import by.teachmeskills.shop.exceptions.RegistrationException;
@@ -18,10 +17,12 @@ import by.teachmeskills.shop.repositories.CategoryRepository;
 import by.teachmeskills.shop.repositories.UserRepository;
 import by.teachmeskills.shop.services.OrderService;
 import by.teachmeskills.shop.services.UserService;
-import by.teachmeskills.shop.utils.EncryptionUtils;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
@@ -34,15 +35,18 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final OrderService orderService;
     private final CategoryRepository categoryRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, OrderService orderService, CategoryRepository categoryRepository) {
+    public UserServiceImpl(UserRepository userRepository, OrderService orderService, CategoryRepository categoryRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.orderService = orderService;
         this.categoryRepository = categoryRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public User create(User entity) {
+        entity.setPassword(passwordEncoder.encode(entity.getPassword()));
         return userRepository.save(entity);
     }
 
@@ -57,29 +61,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delete(int id) throws EntityNotFoundException {
-        User user = userRepository.findById(id);
-        if (user != null) {
-            userRepository.delete(user);
-        } else {
-            throw new EntityNotFoundException(String.format("Пользователя с id %d не найдено.", id));
-        }
+    public void delete(int id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с id %d не найдено.", id)));
+        userRepository.delete(user);
     }
 
     @Override
-    public User getUserById(int id) {
-        return userRepository.findById(id);
-    }
-
-    @Override
-    public User getUserByEmailAndPassword(String email, String password) throws EntityNotFoundException {
-        return userRepository.findByEmailAndPassword(email, password);
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с почтой %s не найдено.", email)));
     }
 
     @Override
     public ModelAndView authenticate(User user) throws LoginException, IncorrectUserDataException {
         if (user != null && user.getEmail() != null && user.getPassword() != null) {
-            User loggedUser = userRepository.findByEmailAndPassword(user.getEmail(), EncryptionUtils.encrypt(user.getPassword()));
+            User loggedUser = userRepository.findByEmailAndPassword(user.getEmail(), user.getPassword());
 
             if (loggedUser != null) {
                 ModelMap model = new ModelMap();
@@ -107,8 +104,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ModelAndView createUser(User user) throws RegistrationException {
-        if (checkUserAlreadyExists(user.getEmail(), user.getPassword())) {
-            user.setPassword(EncryptionUtils.encrypt(user.getPassword()));
+        if (checkUserAlreadyExists(user.getEmail())) {
             User createdUser = create(user);
 
             if (createdUser != null) {
@@ -137,8 +133,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ModelAndView updateData(User user) {
-        update(user);
-        return generateAccountPage(user);
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User existingUser = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с почтой %s не найдено.", userEmail)));
+        existingUser.setName(user.getName());
+        existingUser.setSurname(user.getSurname());
+        existingUser.setBirthday(user.getBirthday());
+        existingUser.setEmail(user.getEmail());
+        update(existingUser);
+
+
+        //Нужно разобраться в реализации изменения email и password, и помещении обновленной сущности SecurityContext.
+
+
+        return generateAccountPage(existingUser.getEmail());
     }
 
     @Override
@@ -146,19 +154,28 @@ public class UserServiceImpl implements UserService {
         if (passwords.getOldPassword().equals(user.getPassword())
                 && passwords.getNewPassword().equals(passwords.getNewPasswordRep()) &&
                 !passwords.getNewPassword().equals(user.getPassword())) {
-            user.setPassword(passwords.getNewPassword());
-            update(user);
 
-            return generateAccountPage(user);
+            String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+            User existingUser = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с почтой %s не найдено.", userEmail)));
+
+            existingUser.setPassword(passwordEncoder.encode(passwords.getNewPassword()));
+            update(existingUser);
+
+            //Нужно разобраться в реализации изменения email и password, и помещении обновленной сущности SecurityContext.
+
+
+            return generateAccountPage(existingUser.getEmail());
         }
 
         throw new IncorrectUserDataException("Введены некорректные данные: неверный действующий пароль, либо новый пароль и повтор нового пароля не совпадают.");
     }
 
     @Override
-    public ModelAndView generateAccountPage(User user) {
+    public ModelAndView generateAccountPage(String userEmail) {
         ModelMap model = new ModelMap();
 
+        User user = getUserByEmail(userEmail);
         model.addAttribute(RequestParamsEnum.USER_ID.getValue(), user.getId());
         model.addAttribute(RequestParamsEnum.NAME.getValue(), user.getName());
         model.addAttribute(RequestParamsEnum.SURNAME.getValue(), user.getSurname());
@@ -172,9 +189,9 @@ public class UserServiceImpl implements UserService {
         return new ModelAndView(PagesPathEnum.USER_ACCOUNT_PAGE.getPath(), model);
     }
 
-    private boolean checkUserAlreadyExists(String email, String password) {
+    private boolean checkUserAlreadyExists(String email) {
         try {
-            User existUser = getUserByEmailAndPassword(email, password);
+            User existUser = getUserByEmail(email);
             return existUser == null;
         } catch (EntityNotFoundException e) {
             return true;

@@ -18,9 +18,7 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler({LoginException.class, EntityNotFoundException.class})
     public ModelAndView handlerAuthorisationException(Exception ex) {
         ModelMap modelMap = new ModelMap();
-        modelMap.addAttribute(RequestParamsEnum.ERROR_PARAM.getValue(),
-                String.format("При попытке входа произошла ошибка: %s.",
-                        ex.getMessage()));
+        modelMap.addAttribute(RequestParamsEnum.ERROR_PARAM.getValue(), ex.getMessage());
         return new ModelAndView(PagesPathEnum.REGISTRATION_OR_LOGIN_ERROR_PAGE.getPath(), modelMap);
     }
 

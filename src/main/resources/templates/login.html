@@ -13,7 +13,7 @@
     <div class="col-md-8 offset-md-4">
         <h2>Вход</h2>
         <p>Пожалуйста, введите свои данные:</p>
-        <form method="post" action="/login">
+        <form method="POST" th:action="@{/login}">
             <div class="form-group">
                 <label for="email">Логин:</label>
                 <input type="text" class="form-control w-25" id="email" placeholder="Введите email" name="email">
