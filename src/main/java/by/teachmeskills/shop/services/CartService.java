@@ -32,7 +32,8 @@ public class CartService {
         ModelMap model = new ModelMap();
 
         int productId = Integer.parseInt(id);
-        Product product = productRepository.findById(productId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException(String.format("Продукта с id %s не найдено.", id)));
         shopCart.addProduct(product);
 
         model.addAttribute(RequestParamsEnum.PRODUCT.getValue(), product);

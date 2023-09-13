@@ -13,6 +13,7 @@ import by.teachmeskills.shop.repositories.OrderRepository;
 import by.teachmeskills.shop.services.OrderService;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
@@ -59,15 +60,15 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void delete(int id) {
-        Order order = orderRepository.findById(id);
-        if (order != null) {
-            orderRepository.delete(order);
-        }
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Заказа с id %d не найдено.", id)));
+        orderRepository.delete(order);
     }
 
     @Override
     public Order getOrderById(int id) {
-        return orderRepository.findById(id);
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Заказа с id %d не найдено.", id)));
     }
 
     @Override

@@ -11,8 +11,6 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
-    Product findById(int id);
-
     List<Product> findAllByCategoryId(int categoryId);
 
     Page<Product> findAllByCategoryId(int categoryId, Pageable pageable);

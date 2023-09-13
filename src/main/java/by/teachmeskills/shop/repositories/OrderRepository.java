@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
-    Order findById(int id);
     List<Order> findByCreatedAt(LocalDateTime date);
     List<Order> findByUserId(int id);
 }

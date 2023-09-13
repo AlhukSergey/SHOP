@@ -9,7 +9,6 @@ import by.teachmeskills.shop.enums.InfoEnum;
 import by.teachmeskills.shop.enums.PagesPathEnum;
 import by.teachmeskills.shop.enums.RequestParamsEnum;
 import by.teachmeskills.shop.enums.ShopConstants;
-import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.exceptions.IncorrectUserDataException;
 import by.teachmeskills.shop.exceptions.LoginException;
 import by.teachmeskills.shop.exceptions.RegistrationException;
@@ -19,6 +18,7 @@ import by.teachmeskills.shop.repositories.UserRepository;
 import by.teachmeskills.shop.services.OrderService;
 import by.teachmeskills.shop.services.UserService;
 import by.teachmeskills.shop.utils.EncryptionUtils;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -58,17 +58,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(int id) throws EntityNotFoundException {
-        User user = userRepository.findById(id);
-        if (user != null) {
-            userRepository.delete(user);
-        } else {
-            throw new EntityNotFoundException(String.format("Пользователя с id %d не найдено.", id));
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с id %d не найдено.", id)));
+        userRepository.delete(user);
     }
 
     @Override
     public User getUserById(int id) {
-        return userRepository.findById(id);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с id %d не найдено.", id)));
     }
 
     @Override
