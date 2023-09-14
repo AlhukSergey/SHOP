@@ -70,6 +70,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с id %d не найдено.", id)));
         userRepository.delete(user);
+    }
 
     @Override
     public User getUserByEmail(String email) {
