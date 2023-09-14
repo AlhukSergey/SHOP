@@ -6,7 +6,6 @@ import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.exceptions.IncorrectUserDataException;
 import by.teachmeskills.shop.exceptions.LoginException;
 import by.teachmeskills.shop.exceptions.RegistrationException;
-import jakarta.validation.Valid;
 import org.springframework.web.servlet.ModelAndView;
 
 public interface UserService extends BaseService<User> {
@@ -18,7 +17,7 @@ public interface UserService extends BaseService<User> {
 
     ModelAndView updateData(User user);
 
-    ModelAndView updatePassword(User user, @Valid PasswordForm passwords) throws IncorrectUserDataException;
+    ModelAndView updatePassword(PasswordForm passwords) throws IncorrectUserDataException;
 
     ModelAndView generateAccountPage(String userEmail);
 }

@@ -58,7 +58,7 @@ public class UserAccountController {
     }
 
     @PostMapping("/updatePassword")
-    public ModelAndView updateUserData(@ModelAttribute("passwordForm") @Valid PasswordForm passwords, BindingResult bindingResult, ModelAndView modelAndView, User user) throws IncorrectUserDataException {
+    public ModelAndView updateUserData(@ModelAttribute("passwordForm") @Valid PasswordForm passwords, BindingResult bindingResult, ModelAndView modelAndView) throws IncorrectUserDataException {
         if (bindingResult.hasErrors()) {
             populateError("oldPassword", modelAndView, bindingResult);
             populateError("newPassword", modelAndView, bindingResult);
@@ -68,7 +68,7 @@ public class UserAccountController {
             return modelAndView;
         }
 
-        return userService.updatePassword(user, passwords);
+        return userService.updatePassword(passwords);
     }
 
     private void populateError(String field, ModelAndView modelAndView, BindingResult bindingResult) {

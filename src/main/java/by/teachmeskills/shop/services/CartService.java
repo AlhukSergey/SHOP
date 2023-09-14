@@ -80,6 +80,7 @@ public class CartService {
         orderService.create(order);
 
         shopCart.clear();
+        model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.SUCCESSFUL_CHECKOUT_INFO.getInfo());
         return new ModelAndView(PagesPathEnum.SHOPPING_CART_PAGE.getPath());
     }
 }

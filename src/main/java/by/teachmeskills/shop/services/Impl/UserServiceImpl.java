@@ -15,13 +15,16 @@ import by.teachmeskills.shop.exceptions.RegistrationException;
 import by.teachmeskills.shop.exceptions.UserAlreadyExistsException;
 import by.teachmeskills.shop.repositories.CategoryRepository;
 import by.teachmeskills.shop.repositories.UserRepository;
+import by.teachmeskills.shop.services.CustomUserDetailsService;
 import by.teachmeskills.shop.services.OrderService;
 import by.teachmeskills.shop.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
@@ -35,12 +38,14 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final OrderService orderService;
     private final CategoryRepository categoryRepository;
+    private final CustomUserDetailsService customUserDetailsService;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, OrderService orderService, CategoryRepository categoryRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, OrderService orderService, CategoryRepository categoryRepository, CustomUserDetailsService customUserDetailsService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.orderService = orderService;
         this.categoryRepository = categoryRepository;
+        this.customUserDetailsService = customUserDetailsService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -141,16 +146,35 @@ public class UserServiceImpl implements UserService {
         existingUser.setEmail(user.getEmail());
         update(existingUser);
 
-
-        //Нужно разобраться в реализации изменения email и password, и помещении обновленной сущности SecurityContext.
-
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(existingUser.getEmail());
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
         return generateAccountPage(existingUser.getEmail());
     }
 
     @Override
-    public ModelAndView updatePassword(User user, PasswordForm passwords) throws IncorrectUserDataException {
-        if (passwords.getOldPassword().equals(user.getPassword())
+    public ModelAndView updatePassword(PasswordForm passwords) throws IncorrectUserDataException {
+        //Реализация смены пароля без проверки, на то, что новый пароль может быть эквивалентен действующему паролю.
+        //Сравниваю только новый пароль и повтор нового пароля. В будущем разобраться с алгоритмом хеширования для возможности декодинга пароля.
+        if (passwords.getNewPassword().equals(passwords.getNewPasswordRep())) {
+            String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+            User existingUser = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с почтой %s не найдено.", userEmail)));
+
+            existingUser.setPassword(passwordEncoder.encode(passwords.getNewPassword()));
+            update(existingUser);
+
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(existingUser.getEmail());
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+            return generateAccountPage(existingUser.getEmail());
+        }
+
+        throw new IncorrectUserDataException("Введены некорректные данные: неверный действующий пароль, либо новый пароль и повтор нового пароля не совпадают.");
+
+        /*if (passwords.getOldPassword().equals(user.getPassword())
                 && passwords.getNewPassword().equals(passwords.getNewPasswordRep()) &&
                 !passwords.getNewPassword().equals(user.getPassword())) {
 
@@ -161,13 +185,14 @@ public class UserServiceImpl implements UserService {
             existingUser.setPassword(passwordEncoder.encode(passwords.getNewPassword()));
             update(existingUser);
 
-            //Нужно разобраться в реализации изменения email и password, и помещении обновленной сущности SecurityContext.
-
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(existingUser.getEmail());
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(auth);
 
             return generateAccountPage(existingUser.getEmail());
         }
 
-        throw new IncorrectUserDataException("Введены некорректные данные: неверный действующий пароль, либо новый пароль и повтор нового пароля не совпадают.");
+        throw new IncorrectUserDataException("Введены некорректные данные: неверный действующий пароль, либо новый пароль и повтор нового пароля не совпадают.");*/
     }
 
     @Override

@@ -14,7 +14,8 @@ public enum InfoEnum {
     USER_ALREADY_EXISTS("Пользователь с такими данными уже существует. Перейдите на страницу входа."),
     SERVER_ERROR_INFO("При попытке подключения к базе данных произошла непредвиденная ошибка. Пожалуйста, попробуйте позже."),
     CATEGORIES_SUCCESSFUL_ADDED_INFO("Новые категории успешно загружены."),
-    PRODUCTS_SUCCESSFUL_ADDED_INFO("Новые продукты успешно загружены.");
+    PRODUCTS_SUCCESSFUL_ADDED_INFO("Новые продукты успешно загружены."),
+    SUCCESSFUL_CHECKOUT_INFO("Заказ успешно оформлен.");
 
     private final String info;
 
