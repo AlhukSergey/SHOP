@@ -22,6 +22,8 @@ public class WebSecurityConfig {
                         .hasRole("admin")
                         .requestMatchers(new AntPathRequestMatcher("/account/**"))
                         .authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/cart/checkout"))
+                        .authenticated()
                         .anyRequest().permitAll()
                 ).formLogin(form -> form
                         .loginPage("/login")

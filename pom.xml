@@ -100,6 +100,16 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>9.22.1</version>
+				<configuration>
+					<url>jdbc:mysql://localhost:3306/shop</url>
+					<user>root</user>
+					<password>1002</password>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
