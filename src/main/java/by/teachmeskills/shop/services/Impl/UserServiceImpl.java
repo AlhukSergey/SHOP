@@ -174,26 +174,6 @@ public class UserServiceImpl implements UserService {
         }
 
         throw new IncorrectUserDataException("Введены некорректные данные: неверный действующий пароль, либо новый пароль и повтор нового пароля не совпадают.");
-
-        /*if (passwords.getOldPassword().equals(user.getPassword())
-                && passwords.getNewPassword().equals(passwords.getNewPasswordRep()) &&
-                !passwords.getNewPassword().equals(user.getPassword())) {
-
-            String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-            User existingUser = userRepository.findByEmail(userEmail)
-                    .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с почтой %s не найдено.", userEmail)));
-
-            existingUser.setPassword(passwordEncoder.encode(passwords.getNewPassword()));
-            update(existingUser);
-
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(existingUser.getEmail());
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(auth);
-
-            return generateAccountPage(existingUser.getEmail());
-        }
-
-        throw new IncorrectUserDataException("Введены некорректные данные: неверный действующий пароль, либо новый пароль и повтор нового пароля не совпадают.");*/
     }
 
     @Override
