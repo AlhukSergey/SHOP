@@ -85,9 +85,6 @@ public class ProductServiceImpl implements ProductService {
                 } else {
                     model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.PRODUCTS_NOT_FOUND_INFO.getInfo());
                 }
-//                if (!search.getSearchKey().isBlank() || !search.getCategoryName().isBlank()) {
-//
-//                }
             }
         }
 
