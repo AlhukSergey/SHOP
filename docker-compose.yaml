@@ -14,8 +14,8 @@ services:
     networks:
       - sport_shop_network
 
-  eshop:
-    container_name: shop
+  shop:
+    container_name: sport_shop
     restart: always
     depends_on:
       - mysqldb

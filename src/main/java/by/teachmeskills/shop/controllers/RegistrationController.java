@@ -8,19 +8,14 @@ import by.teachmeskills.shop.services.UserService;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Objects;
 
-import static by.teachmeskills.shop.enums.ShopConstants.USER;
-
 @RestController
-@SessionAttributes({USER})
 @RequestMapping("/registration")
 public class RegistrationController {
     private final UserService userService;
@@ -35,7 +30,7 @@ public class RegistrationController {
     }
 
     @PostMapping
-    public ModelAndView registration(@ModelAttribute(USER) @Validated(User.UserRegistration.class) User user, BindingResult bindingResult, ModelAndView modelAndView) throws RegistrationException, EntityNotFoundException {
+    public ModelAndView registration(@Validated(User.UserRegistration.class) User user, BindingResult bindingResult, ModelAndView modelAndView) throws RegistrationException, EntityNotFoundException {
         if (bindingResult.hasErrors()) {
             populateError("name", modelAndView, bindingResult);
             populateError("surname", modelAndView, bindingResult);
@@ -47,11 +42,6 @@ public class RegistrationController {
         }
 
         return userService.createUser(user);
-    }
-
-    @ModelAttribute(USER)
-    public User setUpUserForm() {
-        return new User();
     }
 
     private void populateError(String field, ModelAndView modelAndView, BindingResult bindingResult) {

@@ -105,7 +105,6 @@ public class OrderServiceImpl implements OrderService {
         List<Order> orders = getOrdersByUserId(user.getId());
         model.addAttribute(RequestParamsEnum.ACTIVE_ORDERS.getValue(), orders.stream().filter(order -> order.getOrderStatus() == OrderStatus.ACTIVE).collect(Collectors.toList()));
         model.addAttribute(RequestParamsEnum.FINISHED_ORDERS.getValue(), orders.stream().filter(order -> order.getOrderStatus() == OrderStatus.FINISHED).collect(Collectors.toList()));
-
         return new ModelAndView(PagesPathEnum.USER_ACCOUNT_PAGE.getPath(), model);
     }
 
