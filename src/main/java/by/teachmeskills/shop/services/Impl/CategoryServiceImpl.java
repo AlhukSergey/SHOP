@@ -76,7 +76,6 @@ public class CategoryServiceImpl implements CategoryService {
         model.addAttribute(RequestParamsEnum.PAGE_SIZE.getValue(), ShopConstants.PAGE_SIZE);
         model.addAttribute(RequestParamsEnum.SELECTED_PAGE_SIZE.getValue(), pageSize);
         model.addAttribute(RequestParamsEnum.TOTAL_PAGES.getValue(), totalPages);
-
         return new ModelAndView(PagesPathEnum.CATEGORY_PAGE.getPath(), model);
     }
 
@@ -97,7 +96,6 @@ public class CategoryServiceImpl implements CategoryService {
         model.addAttribute(RequestParamsEnum.SELECTED_PAGE_SIZE.getValue(), pageSize);
         model.addAttribute(RequestParamsEnum.TOTAL_PAGES.getValue(), totalPages);
         model.addAttribute(RequestParamsEnum.CATEGORIES.getValue(), categories);
-
         return new ModelAndView(PagesPathEnum.HOME_PAGE.getPath(), model);
     }
 

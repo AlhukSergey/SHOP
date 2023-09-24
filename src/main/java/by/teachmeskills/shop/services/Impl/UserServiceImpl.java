@@ -4,6 +4,7 @@ import by.teachmeskills.shop.domain.Category;
 import by.teachmeskills.shop.domain.Order;
 import by.teachmeskills.shop.domain.OrderStatus;
 import by.teachmeskills.shop.domain.PasswordForm;
+import by.teachmeskills.shop.domain.Role;
 import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.InfoEnum;
 import by.teachmeskills.shop.enums.PagesPathEnum;
@@ -14,6 +15,7 @@ import by.teachmeskills.shop.exceptions.LoginException;
 import by.teachmeskills.shop.exceptions.RegistrationException;
 import by.teachmeskills.shop.exceptions.UserAlreadyExistsException;
 import by.teachmeskills.shop.repositories.CategoryRepository;
+import by.teachmeskills.shop.repositories.RoleRepository;
 import by.teachmeskills.shop.repositories.UserRepository;
 import by.teachmeskills.shop.services.CustomUserDetailsService;
 import by.teachmeskills.shop.services.OrderService;
@@ -40,13 +42,15 @@ public class UserServiceImpl implements UserService {
     private final CategoryRepository categoryRepository;
     private final CustomUserDetailsService customUserDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
-    public UserServiceImpl(UserRepository userRepository, OrderService orderService, CategoryRepository categoryRepository, CustomUserDetailsService customUserDetailsService, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, OrderService orderService, CategoryRepository categoryRepository, CustomUserDetailsService customUserDetailsService, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.orderService = orderService;
         this.categoryRepository = categoryRepository;
         this.customUserDetailsService = customUserDetailsService;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -94,11 +98,10 @@ public class UserServiceImpl implements UserService {
                 model.addAttribute(RequestParamsEnum.PAGE_NUMBER.getValue(), 1);
                 model.addAttribute(RequestParamsEnum.PAGE_SIZE.getValue(), ShopConstants.PAGE_SIZE);
                 model.addAttribute(RequestParamsEnum.SELECTED_PAGE_SIZE.getValue(), ShopConstants.PAGE_SIZE);
-                model.addAttribute("totalPages", totalPages);
+                model.addAttribute(RequestParamsEnum.TOTAL_PAGES.getValue(), totalPages);
                 model.addAttribute(RequestParamsEnum.CATEGORIES.getValue(), categories);
                 model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.WELCOME_INFO.getInfo() + loggedUser.getName() + ".");
                 model.addAttribute(RequestParamsEnum.USER.getValue(), loggedUser);
-
                 return new ModelAndView(PagesPathEnum.HOME_PAGE.getPath(), model);
             } else {
                 throw new LoginException(InfoEnum.USER_NOT_FOUND_INFO.getInfo());
@@ -110,10 +113,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public ModelAndView createUser(User user) throws RegistrationException {
         if (checkUserAlreadyExists(user.getEmail())) {
-            User createdUser = create(user);
+            Role role = roleRepository.findByName("user");
+            if (role == null) {
+                throw new RegistrationException("При регистрации нового пользователя произошла ошибка. Попробуйте позже.");
+            }
+            user.setRoles(List.of(role));
 
+            User createdUser = create(user);
             if (createdUser != null) {
                 ModelMap model = new ModelMap();
+
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(createdUser.getEmail());
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(auth);
 
                 Pageable paging = PageRequest.of(0, ShopConstants.PAGE_SIZE, Sort.by("name").ascending());
                 List<Category> categories = categoryRepository.findAll(paging).getContent();
@@ -123,11 +135,9 @@ public class UserServiceImpl implements UserService {
                 model.addAttribute(RequestParamsEnum.PAGE_NUMBER.getValue(), 1);
                 model.addAttribute(RequestParamsEnum.PAGE_SIZE.getValue(), ShopConstants.PAGE_SIZE);
                 model.addAttribute(RequestParamsEnum.SELECTED_PAGE_SIZE.getValue(), ShopConstants.PAGE_SIZE);
-                model.addAttribute("totalPages", totalPages);
+                model.addAttribute(RequestParamsEnum.TOTAL_PAGES.getValue(), totalPages);
                 model.addAttribute(RequestParamsEnum.CATEGORIES.getValue(), categories);
                 model.addAttribute(RequestParamsEnum.INFO.getValue(), InfoEnum.WELCOME_INFO.getInfo() + createdUser.getName() + ".");
-                model.addAttribute(RequestParamsEnum.USER.getValue(), createdUser);
-
                 return new ModelAndView(PagesPathEnum.HOME_PAGE.getPath(), model);
             }
             throw new RegistrationException("При регистрации нового пользователя произошла ошибка. Попробуйте позже.");
@@ -156,8 +166,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ModelAndView updatePassword(PasswordForm passwords) throws IncorrectUserDataException {
-        //Реализация смены пароля без проверки, на то, что новый пароль может быть эквивалентен действующему паролю.
-        //Сравниваю только новый пароль и повтор нового пароля. В будущем разобраться с алгоритмом хеширования для возможности декодинга пароля.
         if (passwords.getNewPassword().equals(passwords.getNewPasswordRep())) {
             String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
             User existingUser = userRepository.findByEmail(userEmail)
@@ -169,10 +177,8 @@ public class UserServiceImpl implements UserService {
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(existingUser.getEmail());
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
-
             return generateAccountPage(existingUser.getEmail());
         }
-
         throw new IncorrectUserDataException("Введены некорректные данные: неверный действующий пароль, либо новый пароль и повтор нового пароля не совпадают.");
     }
 
@@ -190,7 +196,6 @@ public class UserServiceImpl implements UserService {
         List<Order> orders = orderService.getOrdersByUserId(user.getId());
         model.addAttribute(RequestParamsEnum.ACTIVE_ORDERS.getValue(), orders.stream().filter(order -> order.getOrderStatus() == OrderStatus.ACTIVE).collect(Collectors.toList()));
         model.addAttribute(RequestParamsEnum.FINISHED_ORDERS.getValue(), orders.stream().filter(order -> order.getOrderStatus() == OrderStatus.FINISHED).collect(Collectors.toList()));
-
         return new ModelAndView(PagesPathEnum.USER_ACCOUNT_PAGE.getPath(), model);
     }
 

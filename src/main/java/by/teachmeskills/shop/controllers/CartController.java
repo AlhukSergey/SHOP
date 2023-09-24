@@ -1,7 +1,6 @@
 package by.teachmeskills.shop.controllers;
 
 import by.teachmeskills.shop.domain.Cart;
-import by.teachmeskills.shop.domain.User;
 import by.teachmeskills.shop.enums.ShopConstants;
 import by.teachmeskills.shop.exceptions.EntityNotFoundException;
 import by.teachmeskills.shop.services.CartService;
@@ -14,10 +13,9 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
 import static by.teachmeskills.shop.enums.ShopConstants.SHOPPING_CART;
-import static by.teachmeskills.shop.enums.ShopConstants.USER;
 
 @RestController
-@SessionAttributes({SHOPPING_CART, USER})
+@SessionAttributes(SHOPPING_CART)
 @RequestMapping("/cart")
 public class CartController {
     private final CartService cartService;
@@ -42,8 +40,8 @@ public class CartController {
     }
 
     @GetMapping("/checkout")
-    public ModelAndView checkout(@ModelAttribute(SHOPPING_CART) Cart shopCart, User user) {
-        return cartService.checkout(shopCart, user);
+    public ModelAndView checkout(@ModelAttribute(SHOPPING_CART) Cart shopCart) {
+        return cartService.checkout(shopCart);
     }
 
     @ModelAttribute(SHOPPING_CART)
